@@ -1,6 +1,5 @@
 from server.main import app
 
-import os
 import uvicorn
 
 # Thanks:
