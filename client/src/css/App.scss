@@ -1,7 +1,11 @@
 @import "navbar/nav-main";
+@import "frontpage/frontpage-main";
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+:root {
+    font-size: 14px;
+}
+
+.container {
+    margin: 2rem auto 0 auto;
+    max-width: 90%;
 }

@@ -1,7 +1,7 @@
 from collections import Counter
 from functools import lru_cache, reduce
-from dataclasses import dataclass
-from typing import Any, Optional, Union
+from dataclasses import astuple, dataclass, field
+from typing import List, Optional, Union
 
 from .utils import counter_cardinality
 
@@ -17,25 +17,28 @@ import networkx as nx
 # for some idea of how big that number is, it's ~10^1146, which is pretty fucking ridiculous
 # it's possible that DP will speed it up a little, but tbh probably not by much in any case...
 # could this somehow benefit from using parallelism? in which case you could move it to the GPU/Numba
+# yes it can: https://towardsdatascience.com/4-graph-algorithms-on-steroids-for-data-scientists-with-cugraph-43d784de8d0e
+# however, you'd be missing the point. if your graph has a shitload of nodes and edges, use the GPU
+# if your graph isn't so absurdly massive, there's no point (so for now, forget about it)
 
 # the way i see it there are two ways you could go from here:
 # do the stupid brute force way
 # use simulated annealing or some other heuristic method to generate and evalute the graphs
 # - anneal or whatever generates all legal graphs in the search space
-# - it's considered to "converge" when the digraph can be more fully covered by cycles
+# - it's considered to "converge" when the digraph can be more fully covered by cycles ("coverability")
 
 @dataclass
 class Swap(object):
     have: int
     want: int
-    user: Optional[Any] = ""
+    data: Optional[dict] = field(default_factory=lambda: {"name": ""})
 
 class Cycle(object):
     """
     Data container for a cycle object
     Generates the edge and node cover of the cycle as well
     """
-    def __init__(self, cycle: "list[int]"):
+    def __init__(self, cycle: List[int]):
         self.cycle = cycle
         self._edge_counter = None
         self._node_counter = None
@@ -57,7 +60,7 @@ class Cycle(object):
         return self._node_counter
 
 class SwapGraph(object):
-    def __init__(self, edge_list: "Union[list[Swap], Counter]") -> None:
+    def __init__(self, edge_list: Union[List[Swap], Counter]) -> None:
         """
         Generates a swap graph from an edge list
         """
@@ -67,24 +70,22 @@ class SwapGraph(object):
     def add_edge(self, edge: Swap) -> None:
         # use the simple add edge method for edges that don't already exist
         # if the edge already exists, increase its weight by one
-        self.graph.add_edge(edge.have, edge.want, name=edge.user)
+        self.graph.add_edge(edge.have, edge.want, edge.data)
 
     def remove_edge(self, edge: Swap) -> None:
         # if the edge exists and its weight is > 1, decrement the weight
         # if the weight is 1, delete it
-        self.graph.remove_edge(edge.have, edge.want, key=edge.user)
+        self.graph.remove_edge(edge.have, edge.want)
 
-    def add_edges(self, edges: "Union[list[Swap], Counter]") -> None:
+    def add_edges(self, edges: Union[List[Swap], Counter]) -> None:
         if isinstance(edges, Counter):
             edges = [Swap(*e) for e in edges.elements()]
-        for e in edges:
-            self.add_edge(e)
+        self.graph.add_edges_from([astuple(e) for e in edges])
 
-    def remove_edges(self, edges: "Union[list[Swap], Counter]") -> None:
+    def remove_edges(self, edges: Union[List[Swap], Counter]) -> None:
         if isinstance(edges, Counter):
             edges = [Swap(*e) for e in edges.elements()]
-        for e in edges:
-            self.remove_edge(e)
+        self.graph.remove_edges_from([astuple(e) for e in edges])
 
     def _as_digraph(self) -> nx.DiGraph:
         return nx.DiGraph(self.graph)
@@ -99,15 +100,14 @@ class SwapGraph(object):
         scc = nx.strongly_connected_components(self._as_digraph())
         return scc
 
-    def simple_cycles(self) -> "list[Cycle]":
+    def simple_cycles(self) -> List[Cycle]:
         """
         Uses Johnson's algorithm to find all simple cycles in the digraph representation of the swap graph
         """
         cycles = nx.simple_cycles(self._as_digraph())
-        to_ret = sorted(cycles, key=lambda l: len(l), reverse=True)
-        return [Cycle(c) for c in to_ret]
+        return [Cycle(c) for c in sorted(cycles, key=lambda l: len(l), reverse=True)]
 
-    def suggest_swaps(self, covering_cycles: "list[Cycle]"):
+    def suggest_swaps(self, covering_cycles: List[Cycle]):
         """
         Assumes that the swaps are taken from edge_covering_cycles
         However, also allows the possibility of manual swaps outside of the algorithm's suggestion
@@ -129,7 +129,7 @@ class SwapGraph(object):
             
 
 @lru_cache(maxsize=None)
-def edge_covering_cycles(graph: SwapGraph) -> "list[Cycle]":
+def edge_covering_cycles(graph: SwapGraph) -> List[Cycle]:
     """
     Returns the optimal set of edge-covering cycles for a given multidigraph
     """
@@ -153,3 +153,29 @@ def edge_covering_cycles(graph: SwapGraph) -> "list[Cycle]":
                 min_cardinality = remaining_cardinality
                 best_cycle_set = [cycle] + cycle_set
         return best_cycle_set
+
+def edges_uncoverable(graph: SwapGraph) -> int:
+    """
+    Returns an integer count of uncoverable edges
+    """
+    graph_counter = graph.as_counter()
+    covering_cycles = edge_covering_cycles(graph)
+    if len(covering_cycles) == 0:
+        return counter_cardinality(graph_counter)
+    else:
+        coverage_counter = reduce(lambda a, b: a+b, [c.get_edge_cover() for c in covering_cycles])
+        return counter_cardinality(graph_counter - coverage_counter)
+
+def edge_coverability(graph: SwapGraph) -> float:
+    """
+    Returns a percentage indicating how much of the graph can be covered
+    """
+    graph_counter = graph.as_counter()
+    covering_cycles = edge_covering_cycles(graph)
+    if len(covering_cycles) == 0:
+        return 0.0
+    else:
+        coverage_counter = reduce(lambda a, b: a+b, [c.get_edge_cover() for c in covering_cycles])
+        return 1.0 - counter_cardinality(graph_counter - coverage_counter)/counter_cardinality(graph_counter)
+
+# probably need to rewrite some functions as async for when called via the API

@@ -1,18 +1,24 @@
-# unit tests
+from graph.multiswap import MultiSwapProtoGraph, MultiSwap
+# from unit_tests.coverage import TestSingleWantCoverage, TestMultipleWantCoverage
+
 # import unittest
-from graph.graph import Swap, SwapGraph, edge_covering_cycles
 
 if __name__ == "__main__":
-    my_graph = SwapGraph([Swap(*x) for x in [
-        (5, 2, "Malin"),
-        (5, 2, "Sophie"),
-        (3, 2, "Mel"),
-        (4, 2, "Liv"),
-        (4, 3, "Em"),
-        (2, 4, "Haris"),
-        (2, 4, "Shree"),
-        (2, 5, "Chris"),
-        (2, 5, "Nima")
+    # unittest.main()
+    proto_graph = MultiSwapProtoGraph([MultiSwap(*x) for x in [
+        (2, [1,5,6], {"name": "Chris"}),
+        (7, [4,6], {"name": "Nur"}),
+        (4, [6], {"name": "Audrey"}),
+        (8, [1], {"name": "Alvin"}),
+        (4, [1], {"name": "Michael"}),
+        (7, [1,2,3,5,6], {"name": "Nathan"}),
+        (3, [5], {"name": "Xin"}),
+        (7, [1,3,5], {"name": "Maggie"}),
+        (2, [1,3,4,5,6,7,8], {"name": "Riley"}),
+        (6, [1,8], {"name": "Steph"}),
+        (3, [8], {"name": "Nivi"}),
+        (6, [3,4,8], {"name": "Alex"}),
+        (2, [4,6], {"name": "Jun"}),
     ]])
-    covering = edge_covering_cycles(my_graph)
-    print(my_graph.suggest_swaps(covering))
+    anneal_config = proto_graph.anneal_configurations()
+    genetic_config = proto_graph.genetic_configuration()
