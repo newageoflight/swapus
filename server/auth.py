@@ -35,3 +35,5 @@ def on_after_forgot_password(user: UserDB, token: str, request: Request):
 
 cookie_auth = CookieAuthentication(secret=SECRET, lifetime_seconds=3600)
 fastapi_users = FastAPIUsers(user_db, [cookie_auth], User, UserCreate, UserUpdate, UserDB)
+# I honestly have no idea what I'm doing wrong, but for some reason I keep getting an asyncio related error
+# Seriously, I took the code right out of their docs, like WTF could possibly be happening?
