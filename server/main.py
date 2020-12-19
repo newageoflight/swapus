@@ -1,13 +1,17 @@
 from fastapi import FastAPI
 
-from .auth import router as auth_router
+from .auth import SECRET, fastapi_users, cookie_auth, on_after_forgot_password, on_after_register
 
 app = FastAPI()
 
-app.include_router(auth_router)
+app.include_router(fastapi_users.get_auth_router(cookie_auth), prefix="/api/v1/auth/cookie", tags=["auth"])
+app.include_router(fastapi_users.get_register_router(on_after_register), prefix="/api/v1/auth", tags=["auth"])
+app.include_router(fastapi_users.get_reset_password_router(SECRET, after_forgot_password=on_after_forgot_password),
+    prefix="/api/v1/auth", tags=["auth"])
+app.include_router(fastapi_users.get_users_router(), prefix="/api/v1/users", tags=["users"])
 
 # ok hear me out, while I could add a root path to the app as an argument
-# it seems to fuck up when i try to call it from react, so this way stays for now
+# it seems to fuck up when i try to call it from the react app, so this way stays for now
 @app.get("/api/v1/root")
 async def root():
     return {"message": "Hello World!"}

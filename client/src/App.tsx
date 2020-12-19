@@ -7,6 +7,7 @@ import { Frontpage } from './components/pages/Frontpage';
 import { Groups } from './components/pages/Groups';
 import { AddGroup } from './components/pages/AddGroup';
 import { Login } from './components/pages/Login';
+import { Register } from './components/pages/Register';
 
 import "./css/App.css"
 
@@ -21,6 +22,7 @@ function App() {
           <Route path="/about" component={About} />
           <Route path="/add_group" component={AddGroup} />
           <Route path="/login" component={Login} />
+          <Route path="/register" component={Register} />
         </div>
       </div>
     </Router>
