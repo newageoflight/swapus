@@ -22,8 +22,8 @@ export const Login: React.FC = () => {
         <>
             <h1>Login</h1>
             <form onSubmit={handleSubmit}>
-                <label htmlFor="email">Email</label>
-                <input id="email" name="email" type="text" placeholder="Enter your email..." />
+                <label htmlFor="username">Email</label>
+                <input id="username" name="username" type="text" placeholder="Enter your email..." />
                 <br/>
                 <label htmlFor="password">Password</label>
                 <input id="password" name="password" type="password" placeholder="Enter your password..." />

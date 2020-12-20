@@ -8,12 +8,11 @@ export const Register: React.FC = () => {
 
         const data = new FormData(evt.target);
         if (data.get("confirm-password") === data.get("password")) {
-            console.log(JSON.stringify(Object.fromEntries(data)))
             data.delete("confirm-password")
             let registerResult = fetch("/api/v1/auth/register", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "multipart/form-data"
                 },
                 body: JSON.stringify(Object.fromEntries(data))
             }).then(res => console.log(res))
