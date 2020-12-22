@@ -8,22 +8,21 @@ export const Login: React.FC = () => {
         evt.preventDefault();
 
         const data = new FormData(evt.target);
-        fetch("/api/v1/auth/cookie/login", {
+        fetch("/api/v1/auth/token", {
             method: "POST",
-            headers: {
-                "Content-Type": "multipart/form-data"
-            },
             body: data
-        }).then(res => console.log(res))
+        }).then(res => res.json()).then(data => window.localStorage.setItem("authToken", data))
         .catch(err => console.error(err))
+
+        // redirect back to the homepage
     }
 
     return (
         <>
             <h1>Login</h1>
             <form onSubmit={handleSubmit}>
-                <label htmlFor="username">Email</label>
-                <input id="username" name="username" type="text" placeholder="Enter your email..." />
+                <label htmlFor="username">Username</label>
+                <input id="username" name="username" type="text" placeholder="Enter your username..." />
                 <br/>
                 <label htmlFor="password">Password</label>
                 <input id="password" name="password" type="password" placeholder="Enter your password..." />

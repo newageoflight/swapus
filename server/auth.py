@@ -1,39 +1,36 @@
-from fastapi import Request
-from fastapi_users import FastAPIUsers, models
-from fastapi_users.authentication import CookieAuthentication
-from fastapi_users.db import MongoDBUserDatabase
+from datetime import timedelta
+from fastapi import Depends, APIRouter, status
+from fastapi.exceptions import HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 
-import motor.motor_asyncio
-import os
+from .auth_utils import (ACCESS_TOKEN_EXPIRE_MINUTES, authenticate_user, create_access_token,
+    get_current_active_user, User, oauth2_scheme)
 
-DATABASE_URL = "***REMOVED***"
-SECRET = os.urandom(24).hex()
+router = APIRouter(prefix="/api/v1/auth", tags=["authentication"])
 
-class User(models.BaseUser):
+@router.post("/token")
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = await authenticate_user(form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"})
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(data={"sub": user.username}, expires_delta=access_token_expires)
+
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@router.post("/register")
+async def register_new_user(form_data):
+    # server receives username, password and full name of registrant
+    # hashes password using bcrypt
+    # adds it to user database in mongo
     pass
 
-class UserCreate(models.BaseUserCreate):
-    pass
+@router.get("/whoami")
+async def read_users_me(current_user: User = Depends(get_current_active_user)):
+    return current_user
 
-class UserUpdate(User, models.BaseUserUpdate):
-    pass
-
-class UserDB(User, models.BaseUserDB):
-    pass
-
-client = motor.motor_asyncio.AsyncIOMotorClient(DATABASE_URL, uuidRepresentation="standard")
-db = client["swapus"]
-user_col = db["users"]
-user_db = MongoDBUserDatabase(UserDB, user_col)
-# if you want to use fastapi-login see here: https://pypi.org/project/fastapi-login/
-
-def on_after_register(user: UserDB, request: Request):
-    print(f"User {user.id} has registered")
-
-def on_after_forgot_password(user: UserDB, token: str, request: Request):
-    print(f"User {user.id} has forgotten their password. Reset token: {token}")
-
-cookie_auth = CookieAuthentication(secret=SECRET, lifetime_seconds=3600)
-fastapi_users = FastAPIUsers(user_db, [cookie_auth], User, UserCreate, UserUpdate, UserDB)
-# I honestly have no idea what I'm doing wrong, but for some reason I keep getting an asyncio related error
-# Seriously, I took the code right out of their docs, like WTF could possibly be happening?
+@router.get("/protected")
+async def test_protected_endpoint(token: str = Depends(oauth2_scheme)):
+    return {"message": "Hello World!", "token": token}

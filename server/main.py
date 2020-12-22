@@ -1,20 +1,19 @@
 from fastapi import FastAPI
 
-from .auth import SECRET, fastapi_users, cookie_auth, on_after_forgot_password, on_after_register
+from .auth import router as AuthRouter
+
+import asyncio
+import platform
+
+# This part only exists because Windows is retarded.
+if platform.system() == "Windows":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+# Ok even that's not going to fix it, the real reason this won't work has nothing to do with how I've programmed it
+# Instead, it has everything to do with Windows being retarded i.e. unsupported by Mongo's async driver:
+# https://motor.readthedocs.io/en/stable/api-asyncio/asyncio_motor_client.html
 
 app = FastAPI()
-
-app.include_router(fastapi_users.get_auth_router(cookie_auth), prefix="/api/v1/auth/cookie", tags=["auth"])
-app.include_router(fastapi_users.get_register_router(on_after_register), prefix="/api/v1/auth", tags=["auth"])
-app.include_router(fastapi_users.get_reset_password_router(SECRET, after_forgot_password=on_after_forgot_password),
-    prefix="/api/v1/auth", tags=["auth"])
-app.include_router(fastapi_users.get_users_router(), prefix="/api/v1/users", tags=["users"])
-
-# ok hear me out, while I could add a root path to the app as an argument
-# it seems to fuck up when i try to call it from the react app, so this way stays for now
-@app.get("/api/v1/root")
-async def root():
-    return {"message": "Hello World!"}
+app.include_router(AuthRouter)
 
 # Brief outline of what the API will need to do:
 # Core features
