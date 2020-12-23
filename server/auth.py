@@ -1,16 +1,21 @@
 from datetime import timedelta
-from fastapi import Depends, APIRouter, status
+from fastapi import Body, Depends, APIRouter, status
 from fastapi.exceptions import HTTPException
+from fastapi.param_functions import Form
 from fastapi.security import OAuth2PasswordRequestForm
+from motor.motor_asyncio import AsyncIOMotorClient
+from uuid import uuid4
 
 from .auth_utils import (ACCESS_TOKEN_EXPIRE_MINUTES, authenticate_user, create_access_token,
-    get_current_active_user, User, oauth2_scheme)
+    get_current_active_user, get_password_hash, oauth2_scheme)
+from .db.db import get_database
+from .models.auth import RegistrationForm, User, UserInDB, UserToInsert
 
 router = APIRouter(prefix="/api/v1/auth", tags=["authentication"])
 
 @router.post("/token")
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = await authenticate_user(form_data.username, form_data.password)
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncIOMotorClient = Depends(get_database)):
+    user = await authenticate_user(form_data.username, form_data.password, db)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
@@ -21,11 +26,18 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/register")
-async def register_new_user(form_data):
+async def register_new_user(form_data: RegistrationForm = Depends(RegistrationForm.as_form), db: AsyncIOMotorClient = Depends(get_database)):
     # server receives username, password and full name of registrant
     # hashes password using bcrypt
-    # adds it to user database in mongo
-    pass
+    hashed_password = get_password_hash(form_data.password)
+    # create a new userindb object
+    new_user = UserToInsert(**dict(**form_data.dict(exclude={"password"}), hashed_password=hashed_password))
+    new_user_id = await db.swapus.users.insert_one(new_user.dict())
+    if not new_user_id:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="User failed to insert")
+    new_user_in_db = UserInDB(**dict(id=new_user_id.inserted_id, **new_user.dict()))
+    return {"success": True, "created": new_user_in_db.json()}
 
 @router.get("/whoami")
 async def read_users_me(current_user: User = Depends(get_current_active_user)):

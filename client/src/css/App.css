@@ -55,7 +55,7 @@ header nav .left-block .menu {
           order: 2;
 }
 
-header nav ul {
+header nav ul:not(.user-panel) {
   list-style-type: none;
   margin: 0;
   padding: 0;
@@ -69,7 +69,7 @@ header nav ul {
           align-items: stretch;
 }
 
-header nav ul li.item {
+header nav ul:not(.user-panel) li.item {
   display: -webkit-inline-box;
   display: -ms-inline-flexbox;
   display: inline-flex;
@@ -78,7 +78,7 @@ header nav ul li.item {
           align-items: stretch;
 }
 
-header nav ul li.item a {
+header nav ul:not(.user-panel) li.item > a, header nav ul:not(.user-panel) li.item button.user-button {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -95,16 +95,77 @@ header nav ul li.item a {
   transition: all 0.3s ease;
 }
 
-header nav ul li.item a:hover {
+header nav ul:not(.user-panel) li.item > a:hover, header nav ul:not(.user-panel) li.item button.user-button:hover {
   background-color: #ddd;
 }
 
-header nav ul li.item a:active {
+header nav ul:not(.user-panel) li.item > a:active, header nav ul:not(.user-panel) li.item button.user-button:active {
   background-color: #999;
 }
 
-header nav ul li.item a.active {
+header nav ul:not(.user-panel) li.item > a.active, header nav ul:not(.user-panel) li.item button.user-button.active {
   background-color: #eee;
+}
+
+header nav ul:not(.user-panel) li.item button.user-button {
+  background-color: transparent;
+  border: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-size: 1em;
+}
+
+header nav ul:not(.user-panel) li.item button.user-button:focus {
+  border: none;
+  outline: none;
+}
+
+header nav .user-panel {
+  display: block;
+  position: absolute;
+  margin: 4.5rem 0 0 0;
+  padding-top: 1rem;
+  padding-left: 0;
+  list-style-type: none;
+  background-color: white;
+  -webkit-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+          box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  -webkit-transform: translateX(-10px);
+          transform: translateX(-10px);
+}
+
+header nav .user-panel li {
+  width: 100%;
+}
+
+header nav .user-panel li > a, header nav .user-panel li button {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-size: 1em;
+  width: 100%;
+  text-decoration: none;
+  color: black;
+}
+
+header nav .user-panel li > a:hover, header nav .user-panel li button:hover {
+  background-color: #ddd;
+}
+
+header nav .user-panel li > a:active, header nav .user-panel li button:active {
+  background-color: #999;
+}
+
+header nav .user-panel li > a.active, header nav .user-panel li button.active {
+  background-color: #eee;
+}
+
+header nav .user-panel li > a:focus, header nav .user-panel li button:focus {
+  border: none;
+  outline: none;
 }
 
 header nav .user-menu {

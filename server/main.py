@@ -1,6 +1,10 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from motor.motor_asyncio import AsyncIOMotorClient
 
 from .auth import router as AuthRouter
+from .graph import router as GraphRouter
+from .db.db import db
 
 import asyncio
 import platform
@@ -11,9 +15,27 @@ if platform.system() == "Windows":
 # Ok even that's not going to fix it, the real reason this won't work has nothing to do with how I've programmed it
 # Instead, it has everything to do with Windows being retarded i.e. unsupported by Mongo's async driver:
 # https://motor.readthedocs.io/en/stable/api-asyncio/asyncio_motor_client.html
+# Well no, I actually tried this on Linux too. Someone had a similar problem with Sanic.
+# The best option is to try to attach the database to the FastAPI instance somehow.
+# Actually, someone seems to have figured it out:
+# https://github.com/tiangolo/fastapi/issues/1515
+# also look here:
+# https://github.com/markqiu/fastapi-mongodb-realworld-example-app/blob/master/app/crud/user.py
+
+origins = ["http://localhost:3000"]
 
 app = FastAPI()
+app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 app.include_router(AuthRouter)
+app.include_router(GraphRouter)
+
+@app.on_event("startup")
+async def connect_mongo():
+    db.client = AsyncIOMotorClient("***REMOVED***")
+
+@app.on_event("shutdown")
+async def disconnect_mongo():
+    db.client.close()
 
 # Brief outline of what the API will need to do:
 # Core features

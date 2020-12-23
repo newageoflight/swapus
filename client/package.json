@@ -22,6 +22,7 @@
     "react-scripts": "4.0.1",
     "react-simple-oauth2-login": "^0.2.0",
     "react-tabs": "^3.1.2",
+    "recoil": "^0.1.2",
     "typescript": "^4.0.3",
     "web-vitals": "^0.2.4"
   },
@@ -52,7 +53,8 @@
   "devDependencies": {
     "@types/react-modal": "^3.10.6",
     "@types/react-router": "^5.1.8",
-    "@types/react-router-dom": "^5.1.6"
+    "@types/react-router-dom": "^5.1.6",
+    "@types/recoil": "^0.0.1"
   },
   "proxy": "http://localhost:8000/"
 }

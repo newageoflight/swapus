@@ -1,7 +1,13 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { NavLink } from 'react-router-dom'
+import { useRecoilState } from 'recoil';
+import { LoggedIn } from './../../context/LoggedIn';
+import { UserDataInterface } from './../../interfaces/UserDataInterface';
+import { TokenInterface } from './../../interfaces/TokenInterface';
 
 export const Navbar: React.FC = () => {
+    const [loggedIn, setLoggedIn] = useRecoilState(LoggedIn);
+    const [dropDownVisible, setDropDownVisible] = useState(false);
 
     return (
         <header>
@@ -24,7 +30,27 @@ export const Navbar: React.FC = () => {
                 </div>
                 <ul className="user-menu">
                     <li className="item"><NavLink to="/add_group">Add swap group</NavLink></li>
-                    <li className="item"><NavLink to="/login">Login</NavLink></li>
+                    <li className="item">{
+                        loggedIn.username !== "" ? 
+                            (<>
+                                <button className="user-button" onClick={() => setDropDownVisible(!dropDownVisible)}>{loggedIn.username}</button>
+                                {
+                                    dropDownVisible ? 
+                                        (<ul className="user-panel">
+                                            <li><NavLink to="/profile">My profile</NavLink></li>
+                                            <li><button onClick={() => {
+                                                setLoggedIn(
+                                                    {username: "", token: {access_token: "", token_type: ""} as TokenInterface} as UserDataInterface
+                                                )
+                                                localStorage.clear()
+                                                }
+                                            }>Logout</button></li>
+                                        </ul>)
+                                    : ""
+                                }
+                            </>
+                            )
+                            : (<NavLink to="/login">Login</NavLink>)}</li>
                 </ul>
             </nav>
         </header>

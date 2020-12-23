@@ -1,7 +1,8 @@
-
 import React, { useState } from 'react'
+import { useHistory } from 'react-router';
 
 export const Register: React.FC = () => {
+    const history = useHistory();
     const [unmatchedPasswords, setUnmatchedPasswords] = useState(false);
     const handleSubmit = (evt: any) => {
         evt.preventDefault();
@@ -9,13 +10,14 @@ export const Register: React.FC = () => {
         const data = new FormData(evt.target);
         if (data.get("confirm-password") === data.get("password")) {
             data.delete("confirm-password")
-            let registerResult = fetch("/api/v1/auth/register", {
+            fetch("/api/v1/auth/register", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "multipart/form-data"
-                },
-                body: JSON.stringify(Object.fromEntries(data))
-            }).then(res => console.log(res))
+                body: data,
+            }).then(res => res.json())
+            .then(data => {
+                if (data.success)
+                    history.push("/login")
+            })
             .catch(err => console.error(err))
         }
         else
@@ -32,8 +34,11 @@ export const Register: React.FC = () => {
                 borderRadius: "5px"
             }}>Passwords don't match!</div>
             <form onSubmit={handleSubmit}>
-                <label htmlFor="email">Username</label>
+                <label htmlFor="username">Username</label>
                 <input id="username" name="username" type="text" placeholder="Enter your username..." />
+                <br/>
+                <label htmlFor="email">Email</label>
+                <input id="email" name="email" type="text" placeholder="Enter your email..." />
                 <br/>
                 <label htmlFor="password">Password</label>
                 <input id="password" name="password" type="password" placeholder="Enter your password..." />

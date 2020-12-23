@@ -37,7 +37,7 @@ header {
             }
         }
 
-        ul {
+        ul:not(.user-panel) {
             list-style-type: none;
             margin: 0;
             padding: 0;
@@ -50,7 +50,7 @@ header {
                 display: inline-flex;
                 align-items: stretch;
 
-                a {
+                > a, button.user-button {
                     display: flex;
                     text-decoration: none;
                     color: black;
@@ -72,9 +72,72 @@ header {
                     }
                 }
 
+                button.user-button {
+                    background-color: transparent;
+                    border: none;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                        sans-serif;
+                    font-size: 1em;
+
+                    &:focus {
+                        border: none;
+                        outline: none;
+                    }
+                }
+
+
             }
         }
 
+        .user-panel {
+            display: block;
+            position: absolute;
+            margin: 4.5rem 0 0 0;
+            padding-top: 1rem;
+            padding-left: 0;
+            list-style-type: none;
+            background-color: white;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+            border-radius: 5px;
+            transform: translateX(-10px);
+
+            li {
+                width: 100%;
+
+                > a, button {
+                    margin-top: 1rem;
+                    padding: 1rem;
+                    border: none;
+                    outline: none;
+                    background: transparent;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                        sans-serif;
+                    font-size: 1em;
+                    width: 100%;
+                    text-decoration: none;
+                    color: black;
+
+                    &:hover {
+                        background-color: #ddd;
+                    }
+
+                    &:active {
+                        background-color: #999;
+                    }
+
+                    &.active {
+                        background-color: #eee;
+                    }
+
+                    &:focus {
+                        border: none;
+                        outline: none;
+                    }
+                }
+            }
+        }
 
         .user-menu {
             order: 2;
