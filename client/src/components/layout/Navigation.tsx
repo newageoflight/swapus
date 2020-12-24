@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useRecoilState } from 'recoil';
 import { LoggedIn } from './../../context/LoggedIn';
@@ -8,6 +8,10 @@ import { TokenInterface } from './../../interfaces/TokenInterface';
 export const Navbar: React.FC = () => {
     const [loggedIn, setLoggedIn] = useRecoilState(LoggedIn);
     const [dropDownVisible, setDropDownVisible] = useState(false);
+
+    useEffect(() => {
+        setDropDownVisible(false)
+    }, [])
 
     return (
         <header>
@@ -39,10 +43,11 @@ export const Navbar: React.FC = () => {
                                         (<ul className="user-panel">
                                             <li><NavLink to="/profile">My profile</NavLink></li>
                                             <li><button onClick={() => {
+                                                localStorage.clear()
                                                 setLoggedIn(
                                                     {username: "", token: {access_token: "", token_type: ""} as TokenInterface} as UserDataInterface
                                                 )
-                                                localStorage.clear()
+                                                setDropDownVisible(false);
                                                 }
                                             }>Logout</button></li>
                                         </ul>)

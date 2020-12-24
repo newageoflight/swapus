@@ -1,4 +1,4 @@
-.swap-list {
+.swap-list, .swap-members-list {
     list-style-type: none;
     padding-left: 0;
 
@@ -23,6 +23,15 @@
             width: 15px;
         }
 
+        &:hover {
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2)
+        }
+    }
+
+}
+
+.swap-list {
+    li {
         .top {
             font-size: 1.5rem;
         }
@@ -30,10 +39,11 @@
         .bottom {
             font-size: 1.25rem;
         }
-
-        &:hover {
-            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2)
-        }
     }
+}
 
+.swap-members-list {
+    li {
+        margin: 0.5rem 0;
+    }
 }

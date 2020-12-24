@@ -1,43 +1,34 @@
 import React, { useState } from 'react'
+import { useHistory } from 'react-router';
 import { useRecoilValue } from "recoil";
+import { callProtectedEndpoint } from '../../utils/HTTPHandlers';
 import { LoggedIn } from './../../context/LoggedIn';
 
 export const AddGroup: React.FC = () => {
     const [groupOptions, setGroupOptions] = useState([""]);
+    const history = useHistory();
     const loggedIn = useRecoilValue(LoggedIn);
 
     const joinGroup = (evt: any) => {
         evt.preventDefault()
-        const data = new FormData(evt.target);
-        let groupcode = data.get("groupcode")
-        fetch(`/api/v1/graph/join/${groupcode}`, {
-            method:"POST",
-            headers: {
-                "Authorization": `Bearer ${loggedIn.token.access_token}`
-            }
-        })
-            .then(res => res.json())
-            .then(data => console.log(data))
-            .catch(err => console.error(err))
-            // 401 errors should be caught by prompting the user to log back in
+        let data = new FormData(evt.target);
+        let groupcode = data.get("groupcode");
+        async function addSelfToGroup() {
+            await callProtectedEndpoint(`/api/v1/graph/join/${groupcode}`, loggedIn.token.access_token, history, {}, "PUT")
+        }
+        addSelfToGroup()
+        history.push(`/groups/${groupcode}`)
     }
 
     const createNewGroup = (evt: any) => {
         evt.preventDefault()
         let data = new FormData(evt.target);
-        // add self to users in data
-        // convert the formdata into a json object
-        fetch("/api/v1/graph/create", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${loggedIn.token.access_token}`,
-            },
-            body: data
-        })
-            .then(res => res.json())
-            .then(data => console.log(data))
-            .catch(err => console.error(err))
-            // 401 errors should be caught by prompting the user to log back in
+        async function makeGroup() {
+            let ret = await callProtectedEndpoint("/api/v1/graph/create", loggedIn.token.access_token, history, data, "POST")
+            if (!!ret)
+                history.push(`/groups/${ret.created}`)
+        }
+        makeGroup()
     }
 
     return (

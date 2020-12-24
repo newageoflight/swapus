@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from motor.motor_asyncio import AsyncIOMotorClient
 from uuid import uuid4
 
-from .auth_utils import (ACCESS_TOKEN_EXPIRE_MINUTES, authenticate_user, create_access_token,
+from .utils.auth import (ACCESS_TOKEN_EXPIRE_MINUTES, authenticate_user, create_access_token,
     get_current_active_user, get_password_hash, oauth2_scheme)
 from .db.db import get_database
 from .models.auth import RegistrationForm, User, UserInDB, UserToInsert
@@ -15,6 +15,9 @@ router = APIRouter(prefix="/api/v1/auth", tags=["authentication"])
 
 @router.post("/token")
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncIOMotorClient = Depends(get_database)):
+    """
+    Login endpoint. Returns an access JWT that can be stored as a cookie.
+    """
     user = await authenticate_user(form_data.username, form_data.password, db)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
@@ -27,6 +30,9 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
 @router.post("/register")
 async def register_new_user(form_data: RegistrationForm = Depends(RegistrationForm.as_form), db: AsyncIOMotorClient = Depends(get_database)):
+    """
+    Register a new user in the database
+    """
     # server receives username, password and full name of registrant
     # hashes password using bcrypt
     hashed_password = get_password_hash(form_data.password)
@@ -40,9 +46,8 @@ async def register_new_user(form_data: RegistrationForm = Depends(RegistrationFo
     return {"success": True, "created": new_user_in_db.json()}
 
 @router.get("/whoami")
-async def read_users_me(current_user: User = Depends(get_current_active_user)):
+async def read_current_user(current_user: User = Depends(get_current_active_user)):
+    """
+    Returns the current active user
+    """
     return current_user
-
-@router.get("/protected")
-async def test_protected_endpoint(token: str = Depends(oauth2_scheme)):
-    return {"message": "Hello World!", "token": token}

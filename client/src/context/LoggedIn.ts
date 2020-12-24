@@ -5,6 +5,6 @@ export const LoggedIn = atom({
     key: "LoggedIn",
     default: {
         username: localStorage.getItem("username") || "",
-        token: localStorage.getItem("token") || {}
+        token: {access_token: localStorage.getItem("tokenValue"), token_type: localStorage.getItem("tokenType")} || {}
     } as UserDataInterface
 })

@@ -34,16 +34,19 @@ export const Register: React.FC = () => {
                 borderRadius: "5px"
             }}>Passwords don't match!</div>
             <form onSubmit={handleSubmit}>
-                <label htmlFor="username">Username</label>
+                <label htmlFor="username">Username*</label>
                 <input id="username" name="username" type="text" placeholder="Enter your username..." />
+                <br/>
+                <label htmlFor="full_name">Full name</label>
+                <input id="full_name" name="full_name" type="text" placeholder="Enter your full name..." />
                 <br/>
                 <label htmlFor="email">Email</label>
                 <input id="email" name="email" type="text" placeholder="Enter your email..." />
                 <br/>
-                <label htmlFor="password">Password</label>
+                <label htmlFor="password">Password*</label>
                 <input id="password" name="password" type="password" placeholder="Enter your password..." />
                 <br/>
-                <label htmlFor="confirm-password">Confirm password</label>
+                <label htmlFor="confirm-password">Confirm password*</label>
                 <input id="confirm-password" name="confirm-password" type="password" placeholder="Confirm your password..." />
                 <br/>
                 <button type="submit">Register</button>

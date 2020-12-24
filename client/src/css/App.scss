@@ -1,8 +1,17 @@
+@import "consts";
 @import "navbar/nav-main";
 @import "frontpage/frontpage-main";
+@import "forms/forms-main";
+@import "groups/groups-main";
+
+html {
+    box-sizing: border-box;
+    font-size: 100%;
+}
 
 :root {
     font-size: 14px;
+    font-family: $font-stack;
 }
 
 .container {

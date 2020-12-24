@@ -7,26 +7,6 @@ from .utils import counter_cardinality
 
 import networkx as nx
 
-# what happens if someone has more than one option for "want"?
-# while the nodes wouldn't change, the edges would.
-# plus the search space starts to look RIDICULOUS.
-# the number of graph variants you have to sift through ranges from 1 to (N-1)^n
-# where N is the number of nodes, n is the number of applicants looking to swap
-# at least for our likely use cases, N is likely to be small
-# but n can be huge e.g. for internship allocations, (N-1)^n = 14^(1000)
-# for some idea of how big that number is, it's ~10^1146, which is pretty fucking ridiculous
-# it's possible that DP will speed it up a little, but tbh probably not by much in any case...
-# could this somehow benefit from using parallelism? in which case you could move it to the GPU/Numba
-# yes it can: https://towardsdatascience.com/4-graph-algorithms-on-steroids-for-data-scientists-with-cugraph-43d784de8d0e
-# however, you'd be missing the point. if your graph has a shitload of nodes and edges, use the GPU
-# if your graph isn't so absurdly massive, there's no point (so for now, forget about it)
-
-# the way i see it there are two ways you could go from here:
-# do the stupid brute force way
-# use simulated annealing or some other heuristic method to generate and evalute the graphs
-# - anneal or whatever generates all legal graphs in the search space
-# - it's considered to "converge" when the digraph can be more fully covered by cycles ("coverability")
-
 @dataclass
 class Swap(object):
     have: int

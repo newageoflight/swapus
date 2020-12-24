@@ -46,3 +46,8 @@ class MongoModel(BaseModel):
             parsed["_id"] = parsed.pop("id")
         
         return parsed
+
+def demongoify(mongo_model: MongoModel, **kwargs) -> dict:
+    to_ret = mongo_model.dict(**kwargs)
+    old_id = to_ret.pop("id")
+    return dict(**to_ret, id=str(old_id))

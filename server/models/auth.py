@@ -2,7 +2,7 @@ from typing import Optional
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field
 
-from ..utils import as_form
+from ..utils.utils import as_form
 from ..db.mongo_utils import OID, MongoModel
 
 class User(MongoModel):

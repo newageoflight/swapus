@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from server.db.models import get_user
 from typing import Optional
 
 from fastapi import Depends, HTTPException, status
@@ -9,8 +8,8 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 
-from .db.db import get_database
-from .models.auth import User
+from ..db.db import get_database
+from ..models.auth import User, get_user
 
 import os
 

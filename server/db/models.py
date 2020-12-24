@@ -3,7 +3,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field
 from fastapi import Form
 
-from ..utils import as_form
+from ..utils.utils import as_form
 from .mongo_utils import OID, MongoModel
 
 class User(MongoModel):

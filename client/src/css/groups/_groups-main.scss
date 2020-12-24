@@ -1,0 +1,11 @@
+.group-container {
+    display: flex;
+    
+    .group-main {
+        flex: 1;
+    }
+
+    .group-sidebar {
+        flex: 0 0 300px;
+    }
+}
