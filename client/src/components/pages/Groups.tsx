@@ -11,15 +11,6 @@ export const Groups: React.FC = () => {
     const loggedIn = useRecoilValue(LoggedIn)
     const groupList = useRecoilValue(GroupList);
 
-    // useEffect(() => {
-    //     async function getGroups() {
-    //         let userGroups = await callProtectedEndpoint(`/api/v1/graph/usergroups`, loggedIn.token.access_token, history)
-    //         setGroupList(userGroups.data);
-    //     }
-    //     getGroups()
-    //     // eslint-disable-next-line
-    // }, [])
-
     return (
         <>
             <h1>My Swap Groups</h1>

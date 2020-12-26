@@ -28,7 +28,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.post("/register")
+@router.post("/register", response_model=UserInDB)
 async def register_new_user(form_data: RegistrationForm = Depends(RegistrationForm.as_form), db: AsyncIOMotorClient = Depends(get_database)):
     """
     Register a new user in the database
@@ -43,11 +43,21 @@ async def register_new_user(form_data: RegistrationForm = Depends(RegistrationFo
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="User failed to insert")
     new_user_in_db = UserInDB(**dict(id=new_user_id.inserted_id, **new_user.dict()))
-    return {"success": True, "created": new_user_in_db.json()}
+    return new_user_in_db
 
-@router.get("/whoami")
+@router.get("/whoami", response_model=UserInDB)
 async def read_current_user(current_user: User = Depends(get_current_active_user)):
     """
     Returns the current active user
     """
     return current_user
+
+@router.patch("/whoami", response_model=UserInDB)
+async def modify_current_user(modification: User, current_user: User = Depends(get_current_active_user), db: AsyncIOMotorClient = Depends(get_database)):
+    """
+    Update the current active user with a given modification
+    """
+    await db.swapus.users.replace_one({"username": current_user.username}, modification.dict())
+    new_user = await db.swapus.users.find_one({"username": current_user.username})
+    to_ret = UserInDB.from_mongo(new_user)
+    return to_ret

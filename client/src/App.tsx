@@ -1,5 +1,6 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Redirect } from "react-router-dom";
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Route, Redirect, useHistory } from "react-router-dom";
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import "./css/App.css"
 
 import { Navbar } from './components/layout/Navigation';
@@ -11,17 +12,34 @@ import { Login } from './components/pages/Login';
 import { Register } from './components/pages/Register';
 import { GroupPage } from './components/pages/GroupPage';
 import { ProtectedRoute, ProtectedRouteProps } from './components/ProtectedRoute';
-import { useRecoilState } from 'recoil';
 import { LoggedIn } from './context/LoggedIn';
 import { Frontpage } from './components/pages/Frontpage';
 import { Profile } from './components/pages/Profile';
+import { GroupList } from './context/GroupList';
+import { callProtectedEndpoint } from './utils/HTTPHandlers';
+import { GroupInterface } from './interfaces/GroupInterface';
+import { useResetRecoilState } from 'recoil';
 
 function App() {
   // check if we have a valid token stored in localstorage first
   // if not, clear it and redirect to the login page
-  const [loggedIn, setLoggedIn] = useRecoilState(LoggedIn);
+  const history = useHistory();
+  const loggedIn = useRecoilValue(LoggedIn);
+  const resetLoggedIn = useResetRecoilState(LoggedIn);
+  const setGroupList = useSetRecoilState(GroupList);
 
-  // TODO: make one landing page for people who aren't logged in and another for people who are
+    useEffect(() => {
+        async function getGroups() {
+            let userGroups = await callProtectedEndpoint(`/api/v1/graph/usergroups`, loggedIn.token.access_token, history, resetLoggedIn)
+            let dataToSet = (userGroups as GroupInterface[] || [] as GroupInterface[])
+            setGroupList(dataToSet);
+        }
+        console.log(loggedIn)
+        if (!!loggedIn.token.access_token)
+          getGroups()
+        // eslint-disable-next-line
+    }, [loggedIn])
+
   const defaultProtectedRouteProps: ProtectedRouteProps = {
     isAuthenticated: !!loggedIn.token.access_token,
     authenticationPath: "/login",

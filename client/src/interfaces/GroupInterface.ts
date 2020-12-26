@@ -10,7 +10,8 @@ export interface GroupInterface {
 export interface GroupMember {
     username: string,
     have: string | null,
-    want: string[] | null
+    want: string[] | null,
+    comment?: string
 }
 
 export interface GroupMemberSingleWant extends Omit<GroupMember, "want"> {

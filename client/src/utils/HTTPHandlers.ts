@@ -9,28 +9,43 @@ export function handleError(err: any) {
     console.error(err);
 }
 
-export async function callProtectedEndpoint(endpoint: string, tokenVal: string, history: any, payload?: any, method?: string, specifiedHeaders?: Record<string, string>) {
+interface EndpointCallOptions {
+    method?: "GET" | "POST" | "PUT" | "PATCH" | "HEAD" | "DELETE";
+    body?: any;
+    specifiedHeaders?: Record<string,string>;
+    next?: () => void;
+}
+
+export async function callProtectedEndpoint(endpoint: string, tokenVal: string, history: any, loginResetter: () => void, options?: EndpointCallOptions) {
+    let specifiedHeaders: Record<string,string> = (options ? options.specifiedHeaders : {}) as Record<string,string>;
+    let fetchParams = {
+        method: options ? options.method : "GET",
+        headers: {
+            "Authorization": `Bearer ${tokenVal}`,
+            ...specifiedHeaders
+        },
+        body: options ? options.body : null
+    }
     try {
-        let res = await fetch(endpoint, {
-            method: method || "GET",
-            headers: {
-                "Authorization": `Bearer ${tokenVal}`,
-                ...specifiedHeaders
-            },
-            body: payload
-        });
-        if (res.status === 401) {
-            history.push("/login");
-            localStorage.clear();
-            throw new Error("Not logged in!")
+        let res = await fetch(endpoint, fetchParams);
+        switch (res.status) {
+            case 200:
+                return await res.json();
+            case 401:
+                history.push("/login");
+                localStorage.clear();
+                loginResetter();
+                throw new Error("Not logged in!")
+            default:
+                console.log(await res.json());
         }
-        return await res.json();
+        options?.next && options.next();
     } catch (error) {
         console.error(error)
     }
 }
 
-export async function callLogin(endpoint: string, history: any, payload?: any, method?: string, specifiedHeaders?: Record<string, string>) {
+export async function callLogin(endpoint: string, {payload, method, specifiedHeaders, next}: {payload?: any, method?: string, specifiedHeaders?: Record<string, string>, next?: () => void}) {
     try {
         let res = await fetch(endpoint, {
             method: method || "GET",
@@ -39,10 +54,15 @@ export async function callLogin(endpoint: string, history: any, payload?: any, m
             },
             body: payload
         });
-        if (res.status === 401) {
-            throw new Error("Not logged in!")
+        switch (res.status) {
+            case 200:
+                return await res.json();
+            case 401:
+                throw new Error("Not logged in!")
+            default:
+                console.log(await res.json());
         }
-        return await res.json();
+        !!next && next();
     } catch (error) {
         console.error(error)
     }

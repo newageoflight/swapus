@@ -1,7 +1,9 @@
 export interface UserProfileInterface {
     username: string,
-    email: string | null,
-    full_name: string | null,
-    disabled: boolean | null,
+    email?: string,
+    full_name?: string,
+    phone_number?: string,
+    bio?: string,
+    disabled?: boolean,
     hashed_password: string
 }

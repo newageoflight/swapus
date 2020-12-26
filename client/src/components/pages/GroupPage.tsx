@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from 'react'
 import { useHistory, useParams } from 'react-router-dom'
 import { useRecoilState } from 'recoil';
-import CreatableSelect from "react-select/creatable";
 
 import { LoggedIn } from './../../context/LoggedIn';
 import { GroupMember, GroupMemberSingleWant } from './../../interfaces/GroupInterface';
 import { callProtectedEndpoint } from './../../utils/HTTPHandlers';
-import { SwapItem } from '../layout/SwapItem';
 import { GroupSelector } from './../../context/GroupSelector';
-
+import { useResetRecoilState } from 'recoil';
+import { GroupList } from './../../context/GroupList';
+import { createEmptyUserData } from '../../interfaces/UserDataInterface';
+import { SidebarHeadingRow } from './page_components/SidebarHeadingRow';
+import { OpenSwapsList } from './page_components/OpenSwapsList';
+import { SwapCycleSuggestions } from './page_components/SwapCycleSuggestions';
+import { SetPreferencesForm } from './page_components/SetPreferencesForm';
+import { LoadingElement } from './page_components/LoadingElement';
 
 export const GroupPage: React.FC = () => {
     // gonna use this for the selection elements
@@ -18,18 +23,25 @@ export const GroupPage: React.FC = () => {
     // if data is still being fetched from the server it should show a loading screen and not misleading content
     // see here: https://stackoverflow.com/questions/63255744/how-do-i-set-the-result-of-an-api-call-as-the-default-value-for-a-recoil-atom
     const [groupState, setGroupState] = useRecoilState(GroupSelector(id));
+    const resetGroupState = useResetRecoilState(GroupSelector(id));
+    const [groupList, setGroupList] = useRecoilState(GroupList);
     const [loggedIn, setLoggedIn] = useRecoilState(LoggedIn);
+    const resetLoggedIn = () => setLoggedIn(createEmptyUserData())
     const [currentHave, setCurrentHave] = useState<string>();
+    const [currentComment, setCurrentComment] = useState<string>();
     const [currentWant, setCurrentWant] = useState<string[]>();
-    const [showChangePreferences, setShowChangePreferences] = useState(false);
     // TODO: can this be changed to use Recoil state as a cache?
 
     useEffect(() => {
         async function setGroups() {
-            let groupData = await callProtectedEndpoint(`/api/v1/graph/group/${id}`, loggedIn.token.access_token, history)
-            setGroupState(groupData.data)
+            let groupData = await callProtectedEndpoint(`/api/v1/graph/group/${id}`, loggedIn.token.access_token, history, resetLoggedIn)
+            if (!groupData)
+                history.push("/")
+            else
+                setGroupState(groupData)
         }
         setGroups()
+        // eslint-disable-next-line
     }, [])
 
     useEffect(() => {
@@ -37,34 +49,33 @@ export const GroupPage: React.FC = () => {
         if (!!groupState) {
             let currentUserPrefs = groupState.members.find((props: GroupMember) => props.username === loggedIn.username)
             setCurrentHave(currentUserPrefs?.have as string)
+            setCurrentComment(currentUserPrefs?.comment as string)
             setCurrentWant(currentUserPrefs?.want as string[])
         }
         // eslint-disable-next-line
     }, [groupState])
-    
-    const handleSubmit = (evt: any) => {
-        setShowChangePreferences(false);
-        evt.preventDefault();
-        let data = new FormData(evt.target);
-        data.set("username", loggedIn.username);
-        data.set("db_id", id);
-        // now post the form
-        const setData = async () => {
-            let results = await callProtectedEndpoint("/api/v1/graph/modify", loggedIn.token.access_token, history, data, "PATCH");
-            let dataToSet = results.data;
-            setGroupState(dataToSet);
-        }
-        setData();
+
+    const setData = async (data: any) => {
+        let results = await callProtectedEndpoint(`/api/v1/graph/group/${id}`, loggedIn.token.access_token, history, resetLoggedIn,
+            {body: JSON.stringify(data), method: "PATCH"});
+        let dataToSet = results;
+        setGroupState(dataToSet);
     }
 
     const deleteGroup = (evt: any) => {
         evt.preventDefault();
         const delThis = async () => {
-            await callProtectedEndpoint(`/api/v1/graph/group/${id}`, loggedIn.token.access_token, history, {}, "DELETE");
+            let result = await callProtectedEndpoint(`/api/v1/graph/group/${id}`, loggedIn.token.access_token, history, resetLoggedIn, {method: "DELETE"});
+            if (result.success) {
+                let newList = groupList;
+                newList.splice(newList.findIndex(({id: grpId}) => grpId === id), 1)
+                setGroupList(newList);
+                resetGroupState()
+                history.push("/")
+            }
         }
         if (window.confirm("Are you sure you want to delete this group?")) {
             delThis()
-            history.push("/")
         }
     }
 
@@ -72,80 +83,27 @@ export const GroupPage: React.FC = () => {
         return (
             <>
                 <header>
-                    <h1>
-                        {groupState?.name}
-                    </h1>
-                    <p>
-                        Group code: {groupState?.id}
-                    </p>
-                    <p>
-                        Owner: {groupState?.owner}
-                    </p>
+                    <h1>{groupState?.name}</h1>
+                    <p>Group code: {groupState?.id}</p>
+                    <p>Owner: {groupState?.owner}</p>
                 </header>
                 <div className="group-container">
                     <aside className="group-sidebar">
-                        <h2>Swap options</h2>
-                        <ul>
-                            {groupState?.options.map(opt => (<li>{opt}</li>))}
-                        </ul>
-                        <h2>Members</h2>
-                        <ul>
-                            {groupState?.members.map(({ username }) => (<li>{username}</li>))}
-                        </ul>
+                        <SidebarHeadingRow headingText="Swap options" arrayItem={groupState?.options} />
+                        <SidebarHeadingRow headingText="Members" arrayItem={groupState?.members.map(({username}) => username)} />
                         {groupState?.owner === loggedIn.username ?
                             <button onClick={deleteGroup}>Delete this group</button>
                         : ""}
                         
                     </aside>
                     <main className="group-main">
-                        <div id="set-preferences">
-                        {
-                            showChangePreferences ? (
-                                <form onSubmit={handleSubmit} id="prefs-form">
-                                    <label htmlFor="have">I have:</label>
-                                    <CreatableSelect name="have" options={groupState.options.map(opt => ({value: opt, label: opt}))} 
-                                        defaultValue={{value: currentHave, label: currentHave}}
-                                    />
-                                    <label htmlFor="want">I want:</label>
-                                    <CreatableSelect name="want" isMulti options={groupState.options.map(opt => ({value: opt, label: opt}))}
-                                    />
-                                    <button type="submit">Submit</button>
-                                    <button onClick={() => setShowChangePreferences(!showChangePreferences)}>Cancel</button>
-                                </form>
-                            ) : (
-                                <>
-                                    <p><strong>I have:</strong> {currentHave}</p>
-                                    <p><strong>I want:</strong> {currentWant?.join(", ")}</p>
-                                    <button onClick={() => setShowChangePreferences(!showChangePreferences)}>Change my preferences</button>
-                                </>
-                            )
-                        }
-                        </div>
+                        <SetPreferencesForm options={groupState.options}
+                            currentHave={currentHave!} currentWant={currentWant!} currentComment={currentComment!}
+                            dataPoster={setData} />
                         <div id="preferences-list">
-                            {groupState.swap_cycles !== null && groupState.swap_cycles.length > 0 ? (
-                                <>
-                                    <h2>Suggested swap cycles for you</h2>
-                                    <ul>
-                                        <li>{groupState.swap_cycles
-                                        .filter((cycle: GroupMemberSingleWant[]) => cycle.map(
-                                            (elem: GroupMemberSingleWant) => elem.username === loggedIn.username
-                                        ))
-                                        .map((cycle: GroupMemberSingleWant[]) => cycle.map(
-                                            (elem: GroupMemberSingleWant, index, arr) =>
-                                                (<>
-                                                    {`${elem.username} (${elem.have}) `}
-                                                    {index < arr.length - 1 ? <>&rarr; </> : ""}
-                                                </>)
-                                        ))}</li>
-                                    </ul>
-                                </>
-                            ) : ""}
-                            <h2>Open swaps</h2>
-                            <ul className="swap-members-list">
-                                {groupState.members.map(m => (
-                                    <SwapItem {...m} />
-                                ))}
-                            </ul>
+                            <SwapCycleSuggestions swapCycles={groupState.swap_cycles?.filter((cycle: GroupMemberSingleWant[]) => 
+                                cycle.map((elem: GroupMemberSingleWant) => elem.username === loggedIn.username))} />
+                            <OpenSwapsList membersWithSwaps={groupState.members.filter(m => m.have && m.want)} />
                         </div>
                     </main>
                 </div>
@@ -153,8 +111,6 @@ export const GroupPage: React.FC = () => {
         )
     else
         return (
-            <>
-                <p>Loading...</p>
-            </>
+            <LoadingElement />
         )
 }

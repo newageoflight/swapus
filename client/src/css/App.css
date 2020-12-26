@@ -110,6 +110,8 @@ header nav ul:not(.user-panel) li.item > a.active, header nav ul:not(.user-panel
 header nav ul:not(.user-panel) li.item button.user-button {
   background-color: transparent;
   border: none;
+  border-radius: 0px;
+  margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   font-size: 1em;
 }
@@ -142,6 +144,7 @@ header nav .user-panel li > a, header nav .user-panel li button {
   margin-top: 1rem;
   padding: 1rem;
   border: none;
+  border-radius: 5px;
   outline: none;
   background: transparent;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
@@ -219,22 +222,71 @@ header nav .user-menu {
   margin: 0.5rem 0;
 }
 
-form button {
+form {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  max-width: 800px;
+  line-height: 2;
+}
+
+form input[type=text], form input[type=password] {
+  width: 100%;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  margin-left: 5px;
+  padding: 0.3rem;
+}
+
+form .input-label-oneline {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  width: 100%;
+}
+
+form .input-label-oneline input[type=text], form .input-label-oneline input[type=password] {
+  -webkit-box-flex: 2;
+      -ms-flex: 2;
+          flex: 2;
+}
+
+form .input-label-oneline label {
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
+form textarea {
+  width: 100%;
+}
+
+form .form-error {
+  background-color: lightcoral;
+  color: white;
+  padding: 0.3rem;
+  border-radius: 5px;
+  margin: 5px 0;
+}
+
+button {
+  margin-top: 5px;
+  margin-right: 5px;
   padding: 0.3em;
   outline: none;
   border: none;
   border-radius: 5px;
+  font-size: 1.05rem;
 }
 
-form button:hover {
+button:hover {
   background-color: #ddd;
 }
 
-form button:active {
+button:active {
   background-color: #999;
 }
 
-form button:focus {
+button:focus {
   background-color: #bbb;
 }
 
@@ -254,6 +306,66 @@ form button:focus {
   -webkit-box-flex: 0;
       -ms-flex: 0 0 300px;
           flex: 0 0 300px;
+  padding-right: 1rem;
+}
+
+.heading-row {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  line-height: 25%;
+}
+
+.heading-row button {
+  border: none;
+  outline: none;
+  background-color: transparent;
+  border-radius: 5px;
+}
+
+.heading-row button:hover {
+  background-color: #ddd;
+}
+
+.heading-row button:active {
+  background-color: #999;
+}
+
+.profile-header {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+}
+
+.profile-header h1 {
+  margin: 0;
+}
+
+.invisible-button {
+  background: transparent;
+  border: none;
+  outline: none;
+  border-radius: 5px;
+  -webkit-transition: 0.3s ease all;
+  transition: 0.3s ease all;
+}
+
+.invisible-button:hover {
+  background-color: #ddd;
+}
+
+.invisible-button:active {
+  background-color: #999;
+}
+
+.profile-form {
+  padding: 1em 0;
 }
 
 html {

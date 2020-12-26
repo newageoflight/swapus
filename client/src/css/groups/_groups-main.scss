@@ -7,5 +7,27 @@
 
     .group-sidebar {
         flex: 0 0 300px;
+        padding-right: 1rem;
+    }
+}
+
+.heading-row {
+    display: flex;
+    justify-content: space-between;
+    line-height: 25%;
+
+    button {
+        border: none;
+        outline: none;
+        background-color: transparent;
+        border-radius: 5px;
+
+        &:hover {
+            background-color: #ddd;
+        }
+
+        &:active {
+            background-color: #999;
+        }
     }
 }

@@ -9,11 +9,13 @@ class SwapGroupMember(MongoModel):
     username: str
     have: Optional[str]
     want: Optional[List[str]]
+    comment: Optional[str]
 
 class SwapGroupMemberSingleWant(MongoModel):
     username: str
     have: Optional[str]
     want: Optional[str]
+    comment: Optional[str]
 
 @as_form
 class MemberUpdateForm(SwapGroupMember):

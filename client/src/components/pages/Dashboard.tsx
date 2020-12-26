@@ -1,29 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { useRecoilValue, useRecoilState } from 'recoil';
+import { useRecoilValue } from 'recoil';
 import { LoggedIn } from '../../context/LoggedIn';
 import { GroupList } from './../../context/GroupList';
-import { callProtectedEndpoint } from '../../utils/HTTPHandlers';
-import { useHistory } from 'react-router';
 import { GroupInterface, GroupMember, GroupMemberSingleWant } from './../../interfaces/GroupInterface';
 import { SwapGroupItem } from '../layout/SwapGroupItem';
 
 export const Dashboard: React.FC = () => {
-    const history = useHistory();
     const loggedIn = useRecoilValue(LoggedIn);
     // if data is still being fetched from the server it should show a loading screen and not misleading content
-    const [groupList, setGroupList] = useRecoilState(GroupList);
+    const groupList = useRecoilValue(GroupList);
     const [currentActiveSwaps, setCurrentActiveSwaps] = useState<GroupInterface[]>([] as GroupInterface[]);
 
     useEffect(() => {
-        async function getGroups() {
-            let userGroups = await callProtectedEndpoint(`/api/v1/graph/usergroups`, loggedIn.token.access_token, history)
-            let dataToSet = (userGroups.data as GroupInterface[])
-            setGroupList(dataToSet);
-            setCurrentActiveSwaps(getCurrentActiveSwaps(dataToSet));
-        }
-        getGroups()
+        setCurrentActiveSwaps(getCurrentActiveSwaps(groupList));
         // eslint-disable-next-line
-    }, [])
+    }, [groupList])
     
     const getCurrentActiveSwaps = (grpList: GroupInterface[]) => {
         for (const grp of grpList) {

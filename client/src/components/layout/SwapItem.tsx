@@ -2,7 +2,7 @@ import React from 'react'
 import { GroupMember } from '../../interfaces/GroupInterface'
 
 
-export const SwapItem: React.FC<GroupMember> = ({username, have, want}) => {
+export const SwapItem: React.FC<GroupMember> = ({username, have, want, comment}) => {
 
     return (
         <>
@@ -16,6 +16,9 @@ export const SwapItem: React.FC<GroupMember> = ({username, have, want}) => {
                             </>
                         ) : ""}
                     </div>
+                </div>
+                <div className="bottom">
+                    <span>{!!comment && comment}</span>
                 </div>
             </li>
         </>

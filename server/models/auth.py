@@ -10,6 +10,7 @@ class User(MongoModel):
     email: Optional[str] = None
     full_name: Optional[str] = None
     disabled: Optional[bool] = None
+    bio: Optional[str] = None
 
 class UserToInsert(User):
     hashed_password: str
