@@ -9,11 +9,11 @@ import { GroupSelector } from './../../context/GroupSelector';
 import { useResetRecoilState } from 'recoil';
 import { GroupList } from './../../context/GroupList';
 import { createEmptyUserData } from '../../interfaces/UserDataInterface';
-import { SidebarHeadingRow } from './page_components/SidebarHeadingRow';
-import { OpenSwapsList } from './page_components/OpenSwapsList';
-import { SwapCycleSuggestions } from './page_components/SwapCycleSuggestions';
-import { SetPreferencesForm } from './page_components/SetPreferencesForm';
-import { LoadingElement } from './page_components/LoadingElement';
+import { SidebarHeadingRow } from '../layout/SidebarHeadingRow';
+import { OpenSwapsList } from '../layout/OpenSwapsList';
+import { SwapCycleSuggestions } from '../layout/SwapCycleSuggestions';
+import { SetPreferencesForm } from '../layout/SetPreferencesForm';
+import { LoadingElement } from '../layout/LoadingElement';
 
 export const GroupPage: React.FC = () => {
     // gonna use this for the selection elements
@@ -45,8 +45,7 @@ export const GroupPage: React.FC = () => {
     }, [])
 
     useEffect(() => {
-        console.log(groupState)
-        if (!!groupState) {
+        if (!!groupState && Object.keys(groupState).length > 0) {
             let currentUserPrefs = groupState.members.find((props: GroupMember) => props.username === loggedIn.username)
             setCurrentHave(currentUserPrefs?.have as string)
             setCurrentComment(currentUserPrefs?.comment as string)
@@ -56,7 +55,6 @@ export const GroupPage: React.FC = () => {
     }, [groupState])
 
     const setData = async (data: any) => {
-        console.log(data)
         let results = await callProtectedEndpoint(`/api/v1/graph/group/${id}`, loggedIn.token.access_token, history, resetLoggedIn,
             {body: JSON.stringify(data), method: "PATCH", specifiedHeaders: {"Content-Type": "application/json"}});
         let dataToSet = results;
@@ -80,13 +78,13 @@ export const GroupPage: React.FC = () => {
         }
     }
 
-    if (!!groupState)
+    if (!!groupState && Object.keys(groupState).length > 0)
         return (
             <>
                 <header>
                     <h1>{groupState?.name}</h1>
-                    <p>Group code: {groupState?.id}</p>
-                    <p>Owner: {groupState?.owner}</p>
+                    <p><strong>Group code:</strong> {groupState?.id}</p>
+                    <p><strong>Owner:</strong> {groupState?.owner}</p>
                 </header>
                 <div className="group-container">
                     <aside className="group-sidebar">
@@ -98,6 +96,7 @@ export const GroupPage: React.FC = () => {
                         
                     </aside>
                     <main className="group-main">
+                        <h2>Your preferences</h2>
                         <SetPreferencesForm options={groupState.options}
                             currentHave={currentHave!} currentWant={currentWant!} currentComment={currentComment!}
                             dataPoster={setData} />

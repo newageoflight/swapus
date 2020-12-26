@@ -22,7 +22,7 @@ export const Dashboard: React.FC = () => {
                 return [] as GroupInterface[];
         }
         return grpList.filter(({swap_cycles: cycles}) => cycles.map(cycle => 
-            !!cycle.findIndex(member => member.username === loggedIn.username)));
+            !!cycle.find(member => member.username === loggedIn.username && (member.have && member.want))));
     }
 
     const getUserHave = ({members}: {members: GroupMember[]}) =>
@@ -34,6 +34,7 @@ export const Dashboard: React.FC = () => {
     const existsCycleInvolvingUser = ({swap_cycles: cycles}: {swap_cycles: Array<Array<GroupMemberSingleWant>>}) =>
         !!cycles.find(cycle => cycle.find(({username, have, want}) => username === loggedIn.username))
 
+    console.log(currentActiveSwaps);
     return (
         <>
             <h1>My Active Swaps</h1>

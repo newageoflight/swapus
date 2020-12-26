@@ -4,9 +4,9 @@ import { useHistory } from 'react-router';
 import { useRecoilState } from "recoil";
 import CreatableSelect from "react-select/creatable";
 
-import { callProtectedEndpoint } from '../../../utils/HTTPHandlers';
-import { LoggedIn } from '../../../context/LoggedIn';
-import { createEmptyUserData } from '../../../interfaces/UserDataInterface';
+import { callProtectedEndpoint } from '../../utils/HTTPHandlers';
+import { LoggedIn } from '../../context/LoggedIn';
+import { createEmptyUserData } from '../../interfaces/UserDataInterface';
 import { FormError } from './FormError';
 
 interface CreateGroupForm {

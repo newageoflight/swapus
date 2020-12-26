@@ -1,6 +1,6 @@
 import React from 'react'
-import { JoinGroup } from './page_components/JoinGroup';
-import { CreateGroup } from './page_components/CreateGroup';
+import { JoinGroup } from '../layout/JoinGroup';
+import { CreateGroup } from '../layout/CreateGroup';
 
 export const AddGroup: React.FC = () => {
     return (

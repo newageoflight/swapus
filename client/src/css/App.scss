@@ -19,3 +19,8 @@ html {
     margin: 2rem auto 0 auto;
     max-width: 90%;
 }
+
+html, body, #root, .App {
+    height: 100%;
+    overflow: hidden;
+}

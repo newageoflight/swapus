@@ -177,12 +177,12 @@ header nav .user-menu {
           order: 2;
 }
 
-.swap-list, .swap-members-list {
+.swap-list, .swap-members-list, .swap-suggestions-list {
   list-style-type: none;
   padding-left: 0;
 }
 
-.swap-list li, .swap-members-list li {
+.swap-item {
   padding: 10px;
   border-radius: 5px;
   border: 1px solid #eee;
@@ -192,22 +192,26 @@ header nav .user-menu {
   transition: all 0.3s ease;
 }
 
-.swap-list li > div, .swap-members-list li > div {
+.swap-item > div {
   display: table-row;
 }
 
-.swap-list li > div > div, .swap-members-list li > div > div {
+.swap-item > div > div {
   display: table-cell;
 }
 
-.swap-list li .icon, .swap-members-list li .icon {
+.swap-item .icon {
   padding: 0 5px 0px 5px;
   width: 15px;
 }
 
-.swap-list li:hover, .swap-members-list li:hover {
+.swap-item:hover {
   -webkit-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
           box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+}
+
+.swap-list li {
+  cursor: pointer;
 }
 
 .swap-list li .top {
@@ -218,8 +222,16 @@ header nav .user-menu {
   font-size: 1.25rem;
 }
 
+.swap-list li:active {
+  background-color: #ddd;
+}
+
 .swap-members-list li {
   margin: 0.5rem 0;
+}
+
+.swap-suggestions-list li {
+  cursor: pointer;
 }
 
 form {
@@ -294,6 +306,11 @@ button:focus {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  height: inherit;
 }
 
 .group-container .group-main {
@@ -382,5 +399,10 @@ html {
 .container {
   margin: 2rem auto 0 auto;
   max-width: 90%;
+}
+
+html, body, #root, .App {
+  height: 100%;
+  overflow: hidden;
 }
 /*# sourceMappingURL=App.css.map */

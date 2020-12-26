@@ -3,7 +3,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { useRecoilValue } from 'recoil';
 import CreatableSelect from "react-select/creatable";
 
-import { LoggedIn } from '../../../context/LoggedIn';
+import { LoggedIn } from '../../context/LoggedIn';
 
 interface ModifyPreferencesForm {
     username: string;
@@ -26,7 +26,6 @@ export const SetPreferencesForm: React.FC<Props> = ({dataPoster, options, curren
     const [showChangePreferences, setShowChangePreferences] = useState(false);
 
     const onSubmit = (data: ModifyPreferencesForm) => {
-        window.alert(JSON.stringify(data))
         data = {...data, username: loggedIn.username};
         if (!data.have)
             data.have = currentHave;

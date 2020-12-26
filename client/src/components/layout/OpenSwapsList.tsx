@@ -1,7 +1,7 @@
 import React from 'react'
 
-import { SwapItem } from '../../layout/SwapItem';
-import { GroupMember } from '../../../interfaces/GroupInterface'
+import { SwapItem } from './SwapItem';
+import { GroupMember } from '../../interfaces/GroupInterface'
 
 interface Props {
     membersWithSwaps: GroupMember[];

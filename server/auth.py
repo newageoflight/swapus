@@ -1,10 +1,8 @@
 from datetime import timedelta
-from fastapi import Body, Depends, APIRouter, status
+from fastapi import Depends, APIRouter, status
 from fastapi.exceptions import HTTPException
-from fastapi.param_functions import Form
 from fastapi.security import OAuth2PasswordRequestForm
 from motor.motor_asyncio import AsyncIOMotorClient
-from uuid import uuid4
 
 from .utils.auth import (ACCESS_TOKEN_EXPIRE_MINUTES, authenticate_user, create_access_token,
     get_current_active_user, get_password_hash, oauth2_scheme)

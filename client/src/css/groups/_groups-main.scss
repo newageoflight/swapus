@@ -1,5 +1,7 @@
 .group-container {
     display: flex;
+    flex-direction: row;
+    height: inherit;
     
     .group-main {
         flex: 1;

@@ -2,7 +2,7 @@ import React from 'react'
 import { useForm } from 'react-hook-form';
 import { useHistory } from 'react-router';
 import { objectToFormData } from '../../utils/FormToJSON';
-import { FormError } from './page_components/FormError';
+import { FormError } from '../layout/FormError';
 
 interface UserRegisterInterface {
     username: string;

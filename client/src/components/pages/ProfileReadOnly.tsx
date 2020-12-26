@@ -8,7 +8,7 @@ import { callProtectedEndpoint } from '../../utils/HTTPHandlers';
 import { LoggedIn } from './../../context/LoggedIn';
 import { createEmptyUserData } from './../../interfaces/UserDataInterface';
 import { UserProfileInterface } from './../../interfaces/UserProfileInterface';
-import { LoadingElement } from './page_components/LoadingElement';
+import { LoadingElement } from '../layout/LoadingElement';
 import { deunderscorify, toTitleCase } from './../../utils/utils';
 
 const displayableKeys = [

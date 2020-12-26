@@ -2,9 +2,9 @@ import React from 'react'
 import { useHistory } from 'react-router';
 import { useRecoilState } from "recoil";
 
-import { callProtectedEndpoint } from '../../../utils/HTTPHandlers';
-import { LoggedIn } from '../../../context/LoggedIn';
-import { createEmptyUserData } from '../../../interfaces/UserDataInterface';
+import { callProtectedEndpoint } from '../../utils/HTTPHandlers';
+import { LoggedIn } from '../../context/LoggedIn';
+import { createEmptyUserData } from '../../interfaces/UserDataInterface';
 
 export const JoinGroup: React.FC = () => {
     const history = useHistory();

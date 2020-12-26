@@ -59,8 +59,6 @@ export async function callLogin(endpoint: string, {payload, method, specifiedHea
                 return await res.json();
             case 401:
                 throw new Error("Not logged in!")
-            default:
-                console.log(await res.json());
         }
         !!next && next();
     } catch (error) {

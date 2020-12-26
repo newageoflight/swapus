@@ -19,8 +19,8 @@ export const SidebarHeadingRow: React.FC<Props> = ({headingText, arrayItem}) => 
             <div className="heading-row">
                 <h2>{headingText} ({arrayItem.length})</h2>
                 <div className="buttons">
-                    <button onClick={() => setShowModal(!showModal)}><FontAwesomeIcon icon={faExpand} /></button>
                     <button onClick={() => setExpandItems(!expandItems)}><FontAwesomeIcon icon={expandItems ? faMinus : faPlus} /></button>
+                    <button onClick={() => setShowModal(true)}><FontAwesomeIcon icon={faExpand} /></button>
                 </div>
             </div>
             {expandItems && (

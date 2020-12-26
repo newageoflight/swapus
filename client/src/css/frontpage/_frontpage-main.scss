@@ -1,37 +1,39 @@
-.swap-list, .swap-members-list {
+.swap-list, .swap-members-list, .swap-suggestions-list {
     list-style-type: none;
     padding-left: 0;
+}
 
-    li {
-        padding: 10px;
-        border-radius: 5px;
-        border: 1px solid #eee;
-        display: table;
-        width: 100%;
-        transition: all 0.3s ease;
+.swap-item {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #eee;
+    display: table;
+    width: 100%;
+    transition: all 0.3s ease;
+
+    > div {
+        display: table-row;
 
         > div {
-            display: table-row;
-
-            > div {
-                display: table-cell;
-            }
+            display: table-cell;
         }
+    }
 
-        .icon {
-            padding: 0 5px 0px 5px; 
-            width: 15px;
-        }
+    .icon {
+        padding: 0 5px 0px 5px; 
+        width: 15px;
+    }
 
-        &:hover {
-            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2)
-        }
+    &:hover {
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2)
     }
 
 }
 
 .swap-list {
     li {
+        cursor: pointer;
+
         .top {
             font-size: 1.5rem;
         }
@@ -39,11 +41,21 @@
         .bottom {
             font-size: 1.25rem;
         }
+
+        &:active {
+            background-color: #ddd;
+        }
     }
 }
 
 .swap-members-list {
     li {
         margin: 0.5rem 0;
+    }
+}
+
+.swap-suggestions-list {
+    li {
+        cursor: pointer;
     }
 }

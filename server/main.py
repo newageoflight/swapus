@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from .auth import router as AuthRouter
@@ -7,6 +7,7 @@ from .graph import router as GraphRouter
 from .db.db import db
 
 import asyncio
+import os
 import platform
 
 # This part only exists because Windows is retarded.
@@ -22,10 +23,8 @@ if platform.system() == "Windows":
 # also look here:
 # https://github.com/markqiu/fastapi-mongodb-realworld-example-app/blob/master/app/crud/user.py
 
-origins = ["http://localhost:3000"]
-
-app = FastAPI()
-app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+app = FastAPI(docs_url="/api/v1/docs")
+app.mount("/", StaticFiles(directory=os.path.join("client", "build"), html=True), name="static")
 app.include_router(AuthRouter)
 app.include_router(GraphRouter)
 
@@ -36,6 +35,7 @@ async def connect_mongo():
 @app.on_event("shutdown")
 async def disconnect_mongo():
     db.client.close()
+
 
 # Brief outline of what the API will need to do:
 # Core features
