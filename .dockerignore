@@ -1,1 +1,11 @@
 allocation-swaps.ipynb
+client/node_modules
+client/public
+client/src
+client/.eslintcache
+client/.gitignore
+client/package.json
+client/README.md
+client/tsconfig.json
+client/yarn-error.log
+client/yarn.lock
