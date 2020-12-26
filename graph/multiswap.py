@@ -1,14 +1,10 @@
 from dataclasses import astuple, dataclass, field
 from functools import reduce
-from graph.multiswap_utils import get_coverability
-from multiprocessing.pool import Pool 
 from typing import List, Optional
 
 from .graph import Swap, SwapGraph, edges_uncoverable
 
-import asyncio
 import math
-import numpy as np
 import random
 
 @dataclass
@@ -45,7 +41,6 @@ class MultiSwapProtoGraph(object):
         iters = 0
         best_state = current_state
         min_uncoverable = edges_uncoverable(current_graph)
-        uncoverable_log = np.empty((0,2), np.int32)
         # Decide whether or not to accept the new config based on total coverability and temperature
         while T >= 1e-8 and iters < iterlimit:
             index_to_change = random.choice([i for i, s in enumerate(usable_swaps) if len(s.want) > 1])
@@ -64,5 +59,4 @@ class MultiSwapProtoGraph(object):
                 min_uncoverable = uncoverable_current
             T *= 1 - cool_rate
             iters += 1
-            uncoverable_log = np.append(uncoverable_log, np.array([[uncoverable_current, min_uncoverable]], np.int32), axis=0)
         return SwapGraph(best_state)
