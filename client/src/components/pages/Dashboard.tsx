@@ -30,7 +30,7 @@ export const Dashboard: React.FC = () => {
 
     const getUserWant = ({members}: {members: GroupMember[]}) =>
         members.find(m => m.username === loggedIn.username)!.want
-    
+
     const existsCycleInvolvingUser = ({swap_cycles: cycles}: {swap_cycles: Array<Array<GroupMemberSingleWant>>}) =>
         !!cycles.find(cycle => cycle.find(({username, have, want}) => username === loggedIn.username))
 

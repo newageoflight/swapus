@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { useForm } from 'react-hook-form';
 import { useHistory } from 'react-router';
 import { objectToFormData } from '../../utils/FormToJSON';
@@ -15,36 +15,27 @@ interface UserRegisterInterface {
 export const Register: React.FC = () => {
     const history = useHistory();
     const { register, errors, handleSubmit, watch } = useForm<UserRegisterInterface>();
-    const [unmatchedPasswords, setUnmatchedPasswords] = useState(false);
     const onSubmit = (data: UserRegisterInterface) => {
-        if (data.confirm_password === data.password) {
-            fetch("/api/v1/auth/register", {
-                method: "POST",
-                body: objectToFormData(data),
-            }).then(res => res.json())
-            .then(data => {
-                if (data.success)
-                    history.push("/login")
-            })
-            .catch(err => console.error(err))
-        }
-        else
-            setUnmatchedPasswords(true)
+        fetch("/api/v1/auth/register", {
+            method: "POST",
+            body: objectToFormData(data),
+        }).then(res => res.json())
+        .then(data => {
+            if (!!data)
+                history.push("/login")
+        })
+        .catch(err => console.error(err))
     }
 
     return (
         <>
             <h1>Register</h1>
-            <div className="unmatched-passwords" style={{
-                display: unmatchedPasswords ? "block" : "none",
-                backgroundColor: "#dc3545",
-                color: "white",
-                borderRadius: "5px"
-            }}>Passwords don't match!</div>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <div className="input-label-oneline">
                     <label htmlFor="username">Username*</label>
-                    <input id="username" name="username" type="text" placeholder="Enter your username..." ref={register({required:true})}/>
+                    <input id="username" name="username" type="text" placeholder="Enter your username..." ref={register({required:true, 
+                        validate: ensureUniqueUsername
+                    })}/>
                 </div>
                 {errors.username && <FormError>Must specify a username</FormError>}
                 <div className="input-label-oneline">
@@ -63,11 +54,17 @@ export const Register: React.FC = () => {
                 <div className="input-label-oneline">
                     <label htmlFor="confirm_password">Confirm password*</label>
                     <input id="confirm_password" name="confirm_password" type="password" placeholder="Confirm your password..."
-                        ref={register({validate: (value) => value === watch("password") || "Passwords don't match"})}/>
+                        ref={register({validate: (value) => value === watch("password")})}/>
                 </div>
                 {errors.confirm_password && <FormError>Passwords do not match!</FormError>}
                 <button type="submit">Register</button>
             </form>
         </>
     )
+}
+
+const ensureUniqueUsername = async (username: string) => {
+    let response = await fetch(`/api/v1/auth/userunique/${username}`);
+    let result = await response.json();
+    return !result.exists;
 }

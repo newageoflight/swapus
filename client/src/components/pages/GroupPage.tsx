@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useHistory, useParams } from 'react-router-dom'
+import { Link, useHistory, useParams } from 'react-router-dom'
 import { useRecoilState } from 'recoil';
 
 import { LoggedIn } from './../../context/LoggedIn';
@@ -56,8 +56,9 @@ export const GroupPage: React.FC = () => {
     }, [groupState])
 
     const setData = async (data: any) => {
+        console.log(data)
         let results = await callProtectedEndpoint(`/api/v1/graph/group/${id}`, loggedIn.token.access_token, history, resetLoggedIn,
-            {body: JSON.stringify(data), method: "PATCH"});
+            {body: JSON.stringify(data), method: "PATCH", specifiedHeaders: {"Content-Type": "application/json"}});
         let dataToSet = results;
         setGroupState(dataToSet);
     }
@@ -90,7 +91,7 @@ export const GroupPage: React.FC = () => {
                 <div className="group-container">
                     <aside className="group-sidebar">
                         <SidebarHeadingRow headingText="Swap options" arrayItem={groupState?.options} />
-                        <SidebarHeadingRow headingText="Members" arrayItem={groupState?.members.map(({username}) => username)} />
+                        <SidebarHeadingRow headingText="Members" arrayItem={groupState?.members.map(({username}) => <Link to={`/profile/${username}`}>{username}</Link>)} />
                         {groupState?.owner === loggedIn.username ?
                             <button onClick={deleteGroup}>Delete this group</button>
                         : ""}

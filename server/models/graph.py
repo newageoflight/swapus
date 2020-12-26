@@ -19,7 +19,7 @@ class SwapGroupMemberSingleWant(MongoModel):
 
 @as_form
 class MemberUpdateForm(SwapGroupMember):
-    db_id: OID = Field()
+    pass
 
 class SwapGroup(MongoModel):
     name: str

@@ -41,7 +41,7 @@ export const Navbar: React.FC = () => {
                                 {
                                     dropDownVisible ? 
                                         (<ul className="user-panel">
-                                            <li><NavLink to="/profile">My profile</NavLink></li>
+                                            <li><NavLink to="/profile" onClick={() => setDropDownVisible(false)}>My profile</NavLink></li>
                                             <li><button onClick={() => {
                                                 localStorage.clear()
                                                 setLoggedIn(

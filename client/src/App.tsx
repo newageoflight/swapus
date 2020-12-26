@@ -15,6 +15,7 @@ import { ProtectedRoute, ProtectedRouteProps } from './components/ProtectedRoute
 import { LoggedIn } from './context/LoggedIn';
 import { Frontpage } from './components/pages/Frontpage';
 import { Profile } from './components/pages/Profile';
+import { ProfileReadOnly } from './components/pages/ProfileReadOnly';
 import { GroupList } from './context/GroupList';
 import { callProtectedEndpoint } from './utils/HTTPHandlers';
 import { GroupInterface } from './interfaces/GroupInterface';
@@ -61,7 +62,8 @@ function App() {
           <ProtectedRoute {...defaultProtectedRouteProps} exact path="/groups/:id" component={GroupPage} />
           <ProtectedRoute {...defaultProtectedRouteProps} path="/about" component={About} />
           <ProtectedRoute {...defaultProtectedRouteProps} path="/add_group" component={AddGroup} />
-          <ProtectedRoute {...defaultProtectedRouteProps} path="/profile" component={Profile} />
+          <ProtectedRoute {...defaultProtectedRouteProps} exact path="/profile" component={Profile} />
+          <ProtectedRoute {...defaultProtectedRouteProps} exact path="/profile/:username" component={ProfileReadOnly} />
           <Route path="/login" component={Login} />
           <Route path="/register" component={Register} />
         </div>

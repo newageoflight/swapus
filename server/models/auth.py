@@ -9,8 +9,9 @@ class User(MongoModel):
     username: str = Field()
     email: Optional[str] = None
     full_name: Optional[str] = None
-    disabled: Optional[bool] = None
+    phone_number: Optional[str] = None
     bio: Optional[str] = None
+    disabled: Optional[bool] = None
 
 class UserToInsert(User):
     hashed_password: str

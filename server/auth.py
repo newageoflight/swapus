@@ -45,19 +45,35 @@ async def register_new_user(form_data: RegistrationForm = Depends(RegistrationFo
     new_user_in_db = UserInDB(**dict(id=new_user_id.inserted_id, **new_user.dict()))
     return new_user_in_db
 
-@router.get("/whoami", response_model=UserInDB)
+@router.get("/whoami", response_model=User)
 async def read_current_user(current_user: User = Depends(get_current_active_user)):
     """
     Returns the current active user
     """
     return current_user
 
+@router.get("/whoami/{username}", response_model=UserInDB)
+async def read_user_by_username(username: str, db: AsyncIOMotorClient = Depends(get_database), token: str = Depends(oauth2_scheme)):
+    """
+    Returns the current active user
+    """
+    user = await db.swapus.users.find_one({"username": username})
+    return UserInDB.from_mongo(user)
+
 @router.patch("/whoami", response_model=UserInDB)
 async def modify_current_user(modification: User, current_user: User = Depends(get_current_active_user), db: AsyncIOMotorClient = Depends(get_database)):
     """
     Update the current active user with a given modification
     """
-    await db.swapus.users.replace_one({"username": current_user.username}, modification.dict())
+    await db.swapus.users.update_one({"_id": current_user.id, "username": current_user.username}, {"$set": modification.dict()})
     new_user = await db.swapus.users.find_one({"username": current_user.username})
     to_ret = UserInDB.from_mongo(new_user)
     return to_ret
+
+@router.get("/userunique/{username}")
+async def ensure_username_unique(username, db: AsyncIOMotorClient = Depends(get_database)):
+    """
+    Endpoint called during the registration process to ensure that a username is unique (i.e. doesn't already exist in the database)
+    """
+    user = await db.swapus.users.find_one({"username": username})
+    return {"success": True, "exists": user is not None}

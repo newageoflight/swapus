@@ -1,5 +1,6 @@
 from typing import List
 from fastapi.exceptions import HTTPException
+from fastapi.param_functions import Path
 from graph.graph import edge_covering_cycles
 from fastapi import APIRouter, Depends, status
 
@@ -8,9 +9,9 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 from .db.db import get_database
 from .db.mongo_utils import demongoify
-from .db.models import User
+from .models.auth import User
 from .models.graph import MemberUpdateForm, SwapGroup, SwapGroupCreationForm, SwapGroupInDB, SwapGroupMember
-from .utils.auth import get_current_active_user, get_current_user, oauth2_scheme
+from .utils.auth import get_current_active_user, oauth2_scheme
 from .utils.graph import swap_graph_from_group_data, translate_cycles_into_demongoed_member_lists
 
 router = APIRouter(prefix="/api/v1/graph", tags=["graph"])
@@ -19,7 +20,7 @@ router = APIRouter(prefix="/api/v1/graph", tags=["graph"])
 async def create_group(
     creation_form: SwapGroupCreationForm,
     db: AsyncIOMotorClient = Depends(get_database),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_active_user)
 ) -> str:
     """
     Create a swap group
@@ -37,21 +38,22 @@ async def create_group(
     return str(new_group_id.inserted_id)
 
 # this seems stupidly insecure but I'm planning to fix it down the line
-@router.put("/join/{groupcode}")
-async def join_group(groupcode, db: AsyncIOMotorClient = Depends(get_database), current_user: User = Depends(get_current_user)):
+@router.put("/join/{group_id}")
+async def join_group(group_id: str, db: AsyncIOMotorClient = Depends(get_database), current_user: User = Depends(get_current_active_user)):
     """
     Join a group with a given code (uses ObjectId at the moment, planning to fix it later)
     """
     add_user = SwapGroupMember(username=current_user.username)
-    group = await db.swapus.groups.update_one({"_id": ObjectId(groupcode)}, {"$addToSet": {"members": add_user.dict()}})
-    return {"success": group.acknowledged, "data": groupcode}
+    group = await db.swapus.groups.update_one({"_id": ObjectId(group_id)}, {"$addToSet": {"members": add_user.dict()}})
+    return {"success": group.acknowledged, "data": group_id}
 
 @router.patch("/group/{group_id}", response_model=SwapGroupInDB)
-async def modify_swap_preferences(group_id, modification: MemberUpdateForm, current_user: User = Depends(get_current_user), db: AsyncIOMotorClient = Depends(get_database)):
+async def modify_swap_preferences(group_id: str, modification: MemberUpdateForm, current_user: User = Depends(get_current_active_user), db: AsyncIOMotorClient = Depends(get_database)):
     """
     Modify a user's swap preferences within a group
     Triggers a recall of the matching algorithm
     """
+    print(modification)
     update = await db.swapus.groups.update_one({"_id": ObjectId(group_id), "members.username": current_user.username}, {"$set": {
         "members.$": modification.dict()
     }})
@@ -65,15 +67,15 @@ async def modify_swap_preferences(group_id, modification: MemberUpdateForm, curr
     proto_best_swap_sequence = best_configuration.suggest_swaps(edge_covering_cycles(best_configuration))
     # will return a list of list of proto-SwapGroupMembers
     best_swap_sequence_demongoed = translate_cycles_into_demongoed_member_lists(proto_best_swap_sequence, group_in_db)
-    update_best_sequence = await db.swapus.groups.update_one({"_id": ObjectId(modification.db_id)}, {"$set":
+    update_best_sequence = await db.swapus.groups.update_one({"_id": ObjectId(group_id)}, {"$set":
         {"swap_cycles": best_swap_sequence_demongoed}
     })
-    new_group = await db.swapus.groups.find_one({"_id": ObjectId(modification.db_id)})
+    new_group = await db.swapus.groups.find_one({"_id": ObjectId(group_id)})
     to_ret = SwapGroupInDB.from_mongo(new_group)
     return to_ret
 
 @router.get("/usergroups", response_model=List[SwapGroupInDB])
-async def get_my_groups(current_user: User = Depends(get_current_user), db: AsyncIOMotorClient = Depends(get_database)):
+async def get_my_groups(current_user: User = Depends(get_current_active_user), db: AsyncIOMotorClient = Depends(get_database)):
     """
     Get the groups that the current user belongs to
     """
@@ -82,16 +84,16 @@ async def get_my_groups(current_user: User = Depends(get_current_user), db: Asyn
     return to_ret
 
 @router.get("/owngroups", response_model=List[SwapGroupInDB])
-async def get_own_groups(current_user: User = Depends(get_current_user), db: AsyncIOMotorClient = Depends(get_database)):
+async def get_own_groups(current_user: User = Depends(get_current_active_user), db: AsyncIOMotorClient = Depends(get_database)):
     """
-    Get the groups that the current user belongs to
+    Get the groups that the current user owns
     """
     groups = await db.swapus.groups.find({"owner": current_user.username}).to_list(None)
     to_ret = [SwapGroupInDB.from_mongo(g) for g in groups]
     return to_ret
 
 @router.get("/group/{group_id}", response_model=SwapGroupInDB)
-async def get_group_by_id(group_id, token: str = Depends(oauth2_scheme), db: AsyncIOMotorClient = Depends(get_database)):
+async def get_group_by_id(group_id: str, token: str = Depends(oauth2_scheme), db: AsyncIOMotorClient = Depends(get_database)):
     """
     Get a group with a specific id (depending on if the user is allowed to access it)
     """
@@ -101,7 +103,7 @@ async def get_group_by_id(group_id, token: str = Depends(oauth2_scheme), db: Asy
     return to_ret
 
 @router.delete("/group/{group_id}", response_model=int)
-async def remove_group_by_id(group_id, current_user: User = Depends(get_current_user), db: AsyncIOMotorClient = Depends(get_database)):
+async def remove_group_by_id(group_id: str, current_user: User = Depends(get_current_active_user), db: AsyncIOMotorClient = Depends(get_database)):
     """
     Delete a group with a specific id (only allowed if the user owns the group)
     """
