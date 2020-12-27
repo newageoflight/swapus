@@ -60,10 +60,10 @@ function App() {
           <ProtectedRoute {...defaultProtectedRouteProps} exact path="/dashboard" component={Dashboard} />
           <ProtectedRoute {...defaultProtectedRouteProps} exact path="/groups" component={Groups} />
           <ProtectedRoute {...defaultProtectedRouteProps} exact path="/groups/:id" component={GroupPage} />
-          <ProtectedRoute {...defaultProtectedRouteProps} path="/about" component={About} />
           <ProtectedRoute {...defaultProtectedRouteProps} path="/add_group" component={AddGroup} />
           <ProtectedRoute {...defaultProtectedRouteProps} exact path="/profile" component={Profile} />
           <ProtectedRoute {...defaultProtectedRouteProps} exact path="/profile/:username" component={ProfileReadOnly} />
+          <Route path="/about" component={About} />
           <Route path="/login" component={Login} />
           <Route path="/register" component={Register} />
         </div>
