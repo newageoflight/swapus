@@ -1,14 +1,11 @@
 import React, { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form';
-import { useRecoilValue } from 'recoil';
 import CreatableSelect from "react-select/creatable";
 
-import { LoggedIn } from '../../context/LoggedIn';
 
 interface ModifyPreferencesForm {
-    username: string;
-    have: string;
-    want: string[];
+    have: string | null;
+    want: string[] | null;
     comment: string | null;
 }
 
@@ -22,11 +19,9 @@ interface Props {
 
 export const SetPreferencesForm: React.FC<Props> = ({dataPoster, options, currentHave, currentWant, currentComment}) => {
     const { register, control, handleSubmit } = useForm<ModifyPreferencesForm>();
-    const loggedIn = useRecoilValue(LoggedIn);
     const [showChangePreferences, setShowChangePreferences] = useState(false);
 
     const onSubmit = (data: ModifyPreferencesForm) => {
-        data = {...data, username: loggedIn.username};
         if (!data.have)
             data.have = currentHave;
         if (!data.want)
@@ -35,6 +30,11 @@ export const SetPreferencesForm: React.FC<Props> = ({dataPoster, options, curren
             data.comment = currentComment;
         // now post the form
         dataPoster(data);
+        setShowChangePreferences(false);
+    }
+
+    const resetPreferences = () => {
+        dataPoster({have: null, want: null, comment: null} as ModifyPreferencesForm);
         setShowChangePreferences(false);
     }
 
@@ -59,14 +59,15 @@ export const SetPreferencesForm: React.FC<Props> = ({dataPoster, options, curren
                     <textarea name="comment" ref={register} defaultValue={currentComment}></textarea>
                     <br/>
                     <button type="submit">Submit</button>
-                    <button onClick={() => setShowChangePreferences(!showChangePreferences)}>Cancel</button>
+                    <button onClick={() => setShowChangePreferences(false)}>Cancel</button>
                 </form>
             ) : (
                 <>
                     <p><strong>I have:</strong> {currentHave}</p>
                     <p><strong>I want:</strong> {currentWant?.join(", ")}</p>
                     <p><strong>Comment:</strong> {currentComment}</p>
-                    <button onClick={() => setShowChangePreferences(!showChangePreferences)}>Change my preferences</button>
+                    <button onClick={() => setShowChangePreferences(true)}>Change my preferences</button>
+                    <button onClick={() => resetPreferences()}>Reset my preferences</button>
                 </>
             )
         }

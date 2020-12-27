@@ -34,6 +34,11 @@ async def register_new_user(form_data: RegistrationForm = Depends(RegistrationFo
     # server receives username, password and full name of registrant
     # hashes password using bcrypt
     hashed_password = get_password_hash(form_data.password)
+    # if the user already exists, throw an error
+    existing_user = await db.swapus.users.find_one({"username": form_data.username})
+    if existing_user:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This username already exists!")
     # create a new userindb object
     new_user = UserToInsert(**dict(**form_data.dict(exclude={"password"}), hashed_password=hashed_password))
     new_user_id = await db.swapus.users.insert_one(new_user.dict())

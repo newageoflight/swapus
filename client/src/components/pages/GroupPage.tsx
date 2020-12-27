@@ -61,7 +61,7 @@ export const GroupPage: React.FC = () => {
         setGroupState(dataToSet);
     }
 
-    const deleteGroup = (evt: any) => {
+    const deleteGroup = (evt: any, msg: string) => {
         evt.preventDefault();
         const delThis = async () => {
             let result = await callProtectedEndpoint(`/api/v1/graph/group/${id}`, loggedIn.token.access_token, history, resetLoggedIn, {method: "DELETE"});
@@ -73,7 +73,7 @@ export const GroupPage: React.FC = () => {
                 history.push("/")
             }
         }
-        if (window.confirm("Are you sure you want to delete this group?")) {
+        if (window.confirm(msg)) {
             delThis()
         }
     }
@@ -91,8 +91,8 @@ export const GroupPage: React.FC = () => {
                         <SidebarHeadingRow headingText="Swap options" arrayItem={groupState?.options} />
                         <SidebarHeadingRow headingText="Members" arrayItem={groupState?.members.map(({username}) => <Link to={`/profile/${username}`}>{username}</Link>)} />
                         {groupState?.owner === loggedIn.username ?
-                            <button onClick={deleteGroup}>Delete this group</button>
-                        : ""}
+                            <button onClick={e => deleteGroup(e, "Are you sure you want to delete this group?")}>Delete this group</button>
+                        : <button onClick={e => deleteGroup(e, "Are you sure you want to leave this group?")}>Leave this group</button>}
                         
                     </aside>
                     <main className="group-main">

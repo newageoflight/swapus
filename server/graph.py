@@ -53,7 +53,6 @@ async def modify_swap_preferences(group_id: str, modification: MemberUpdateForm,
     Modify a user's swap preferences within a group
     Triggers a recall of the matching algorithm
     """
-    print(modification)
     update = await db.swapus.groups.update_one({"_id": ObjectId(group_id), "members.username": current_user.username}, {"$set": {
         "members.$": modification.dict()
     }})
@@ -105,13 +104,17 @@ async def get_group_by_id(group_id: str, token: str = Depends(oauth2_scheme), db
 @router.delete("/group/{group_id}", response_model=int)
 async def remove_group_by_id(group_id: str, current_user: User = Depends(get_current_active_user), db: AsyncIOMotorClient = Depends(get_database)):
     """
-    Delete a group with a specific id (only allowed if the user owns the group)
+    Deletes the group if the user requesting is the group's owner.
+    Otherwise, removes the user from the group.
     """
     # first find the group
     group = await db.swapus.groups.find_one({"_id": ObjectId(group_id)})
     # do they own this group?
-    if group["owner"] != current_user.username:
-        raise HTTPException(status.HTTP_405_METHOD_NOT_ALLOWED)
-    # now remove it
-    result = await db.swapus.groups.delete_one({"_id": ObjectId(group_id)})
-    return {"success": result.deleted_count > 0, "count": result.deleted_count}
+    if group["owner"] == current_user.username:
+        # Delete entire group
+        result = await db.swapus.groups.delete_one({"_id": ObjectId(group_id)})
+        return {"success": result.deleted_count > 0, "count": result.deleted_count}
+    else:
+        # Remove current user
+        result = await db.swapus.groups.update_one({"_id": ObjectId(group_id)}, {"$pull": {"members.username": current_user.username}})
+        return {"success": True, "count": 1}
