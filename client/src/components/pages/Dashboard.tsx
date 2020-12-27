@@ -12,6 +12,7 @@ export const Dashboard: React.FC = () => {
     const [currentActiveSwaps, setCurrentActiveSwaps] = useState<GroupInterface[]>([] as GroupInterface[]);
 
     useEffect(() => {
+        console.log("Group list updated")
         setCurrentActiveSwaps(getCurrentActiveSwaps(groupList));
         // eslint-disable-next-line
     }, [groupList])

@@ -44,7 +44,7 @@ export const Navbar: React.FC = () => {
                         <li className="item">{
                             loggedIn.username !== "" ? 
                                 (<>
-                                    <button className="user-button" onClick={() => setDropDownVisible(!dropDownVisible)}>{loggedIn.username}</button>
+                                    <button className={`user-button ${dropDownVisible ? "active" : ""}`} onClick={() => setDropDownVisible(!dropDownVisible)}>{loggedIn.username}</button>
                                     {
                                         dropDownVisible ? 
                                             (<ul className="user-panel">

@@ -1,9 +1,3 @@
-header {
-  position: -webkit-sticky;
-  position: sticky;
-  z-index: 100;
-}
-
 header nav {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -416,28 +410,28 @@ button:focus {
   background-color: #bbb;
 }
 
-.group-container {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-orient: horizontal;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: row;
-          flex-direction: row;
-  height: inherit;
-}
-
-.group-container .group-main {
-  -webkit-box-flex: 1;
-      -ms-flex: 1;
-          flex: 1;
-}
-
-.group-container .group-sidebar {
-  -webkit-box-flex: 0;
-      -ms-flex: 0 0 300px;
-          flex: 0 0 300px;
-  padding-right: 1rem;
+@media all and (min-width: 768px) {
+  .group-container {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: row;
+            flex-direction: row;
+    height: inherit;
+  }
+  .group-container .group-main {
+    -webkit-box-flex: 1;
+        -ms-flex: 1;
+            flex: 1;
+  }
+  .group-container .group-sidebar {
+    -webkit-box-flex: 0;
+        -ms-flex: 0 0 300px;
+            flex: 0 0 300px;
+    padding-right: 1rem;
+  }
 }
 
 .heading-row {
@@ -518,6 +512,9 @@ html {
 
 html, body, #root, .App {
   height: 100%;
-  overflow: hidden;
+}
+
+.ReactModalPortal {
+  z-index: 2;
 }
 /*# sourceMappingURL=App.css.map */

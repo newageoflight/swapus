@@ -1,8 +1,6 @@
 // mobile first design is encouraged so phones don't suffer as much
 // for desktops use min-width: 960px
 header {
-    position: sticky;
-    z-index: 100;
 
     nav {
         display: flex;

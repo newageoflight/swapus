@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useHistory, useParams } from 'react-router-dom'
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import { LoggedIn } from './../../context/LoggedIn';
 import { GroupMember, GroupMemberSingleWant } from './../../interfaces/GroupInterface';
@@ -14,6 +14,7 @@ import { OpenSwapsList } from '../layout/OpenSwapsList';
 import { SwapCycleSuggestions } from '../layout/SwapCycleSuggestions';
 import { SetPreferencesForm } from '../layout/SetPreferencesForm';
 import { LoadingElement } from '../layout/LoadingElement';
+import { GroupListPartiallyChanged } from './../../context/GroupListPartiallyChanged';
 
 export const GroupPage: React.FC = () => {
     // gonna use this for the selection elements
@@ -25,6 +26,8 @@ export const GroupPage: React.FC = () => {
     const [groupState, setGroupState] = useRecoilState(GroupSelector(id));
     const resetGroupState = useResetRecoilState(GroupSelector(id));
     const [groupList, setGroupList] = useRecoilState(GroupList);
+    // introducing this state particle might be the stupidest idea I've had but at least it works
+    const setPartialChange = useSetRecoilState(GroupListPartiallyChanged);
     const [loggedIn, setLoggedIn] = useRecoilState(LoggedIn);
     const resetLoggedIn = () => setLoggedIn(createEmptyUserData())
     const [currentHave, setCurrentHave] = useState<string>();
@@ -59,6 +62,7 @@ export const GroupPage: React.FC = () => {
             {body: JSON.stringify(data), method: "PATCH", specifiedHeaders: {"Content-Type": "application/json"}});
         let dataToSet = results;
         setGroupState(dataToSet);
+        setPartialChange(true);
     }
 
     const deleteGroup = (evt: any, msg: string) => {
@@ -81,11 +85,11 @@ export const GroupPage: React.FC = () => {
     if (!!groupState && Object.keys(groupState).length > 0)
         return (
             <>
-                <header>
+                <div className="group-header">
                     <h1>{groupState?.name}</h1>
                     <p><strong>Group code:</strong> {groupState?.id}</p>
                     <p><strong>Owner:</strong> {groupState?.owner}</p>
-                </header>
+                </div>
                 <div className="group-container">
                     <aside className="group-sidebar">
                         <SidebarHeadingRow headingText="Swap options" arrayItem={groupState?.options} />

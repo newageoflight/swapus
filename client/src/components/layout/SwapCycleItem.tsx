@@ -13,6 +13,10 @@ interface Props {
     swapCycle: GroupMemberSingleWant[];
 }
 
+const customStyles = {
+    overlay: {zIndex: 100}
+}
+
 export const SwapCycleItem: React.FC<Props> = ({ swapCycle }) => {
     const [showModal, setShowModal] = useState(false);
 
@@ -27,7 +31,7 @@ export const SwapCycleItem: React.FC<Props> = ({ swapCycle }) => {
                     {(index === 5 && index < arr.length - 1) && "..."}
                 </>)}
             </li>
-            <Modal isOpen={showModal} onRequestClose={() => setShowModal(false)} contentLabel="Suggested swap">
+            <Modal isOpen={showModal} onRequestClose={() => setShowModal(false)} contentLabel="Suggested swap" style={customStyles}>
                 <div className="heading-row">
                     <h2>Suggested swap cycle</h2>
                     <button onClick={() => setShowModal(false)}><FontAwesomeIcon icon={faTimes} /></button>

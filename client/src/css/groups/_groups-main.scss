@@ -1,15 +1,18 @@
-.group-container {
-    display: flex;
-    flex-direction: row;
-    height: inherit;
-    
-    .group-main {
-        flex: 1;
-    }
 
-    .group-sidebar {
-        flex: 0 0 300px;
-        padding-right: 1rem;
+@media all and (min-width: 768px) {
+    .group-container {
+        display: flex;
+        flex-direction: row;
+        height: inherit;
+        
+        .group-main {
+            flex: 1;
+        }
+
+        .group-sidebar {
+            flex: 0 0 300px;
+            padding-right: 1rem;
+        }
     }
 }
 

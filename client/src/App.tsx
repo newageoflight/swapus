@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Redirect, useHistory } from "react-router-dom";
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilValue, useSetRecoilState, useRecoilState } from 'recoil';
 import "./css/App.css"
 
 import { Navbar } from './components/layout/Navigation';
@@ -20,6 +20,7 @@ import { GroupList } from './context/GroupList';
 import { callProtectedEndpoint } from './utils/HTTPHandlers';
 import { GroupInterface } from './interfaces/GroupInterface';
 import { useResetRecoilState } from 'recoil';
+import { GroupListPartiallyChanged } from './context/GroupListPartiallyChanged';
 
 function App() {
   // check if we have a valid token stored in localstorage first
@@ -27,6 +28,8 @@ function App() {
   const history = useHistory();
   const loggedIn = useRecoilValue(LoggedIn);
   const resetLoggedIn = useResetRecoilState(LoggedIn);
+  // introducing this state particle might be the stupidest idea I've had but at least it works
+  const [partialChange, setPartialChange] = useRecoilState(GroupListPartiallyChanged);
   const setGroupList = useSetRecoilState(GroupList);
 
     useEffect(() => {
@@ -36,10 +39,12 @@ function App() {
             setGroupList(dataToSet);
         }
         console.log(loggedIn)
-        if (!!loggedIn.token.access_token)
+        if (!!loggedIn.token.access_token && partialChange) {
           getGroups()
+          setPartialChange(false);
+        }
         // eslint-disable-next-line
-    }, [loggedIn])
+    }, [loggedIn, partialChange])
 
   const defaultProtectedRouteProps: ProtectedRouteProps = {
     isAuthenticated: !!loggedIn.token.access_token,

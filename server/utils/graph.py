@@ -1,6 +1,9 @@
 from typing import List
 from graph.multiswap import MultiSwap, MultiSwapProtoGraph
+from motor.motor_asyncio import AsyncIOMotorClient
+from bson.objectid import ObjectId
 from ..models.graph import SwapGroupInDB, SwapGroupMemberSingleWant
+from graph.graph import edge_covering_cycles
 
 def swap_graph_from_group_data(group: SwapGroupInDB) -> MultiSwapProtoGraph:
     as_swaps = []
@@ -29,3 +32,17 @@ def translate_cycles_into_member_lists(cycles, group: SwapGroupInDB) -> List[Lis
 def translate_cycles_into_demongoed_member_lists(cycles, group: SwapGroupInDB) -> List[List[dict]]:
     proto = translate_cycles_into_member_lists(cycles, group)
     return [[m.dict() for m in c] for c in proto]
+
+async def recalculate_swap_paths(group_id: str, db: AsyncIOMotorClient) -> None:
+    group = await db.swapus.groups.find_one({"_id": ObjectId(group_id)})
+    # at this point it should also check if there are any additions to the options and update those too
+    # MultiSwap takes integers so you need to translate it first
+    group_in_db = SwapGroupInDB.from_mongo(group)
+    new_swap_graph = swap_graph_from_group_data(group_in_db)
+    best_configuration = new_swap_graph.determine_optimal_configuration()
+    proto_best_swap_sequence = best_configuration.suggest_swaps(edge_covering_cycles(best_configuration))
+    # will return a list of list of proto-SwapGroupMembers
+    best_swap_sequence_demongoed = translate_cycles_into_demongoed_member_lists(proto_best_swap_sequence, group_in_db)
+    update_best_sequence = await db.swapus.groups.update_one({"_id": ObjectId(group_id)}, {"$set":
+        {"swap_cycles": best_swap_sequence_demongoed}
+    })

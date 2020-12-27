@@ -26,8 +26,8 @@ export const CreateGroup: React.FC = () => {
             let ret = await callProtectedEndpoint("/api/v1/graph/create", loggedIn.token.access_token, history, resetLoggedIn, {
                 method: "POST", body: JSON.stringify(data), specifiedHeaders: {"Content-Type": "application/json"}
             })
-            if (!!ret)
-                history.push(`/groups/${ret}`)
+            if (!!ret && Object.keys(ret).length > 0 && ret.success)
+                history.push(`/groups/${ret.data}`)
         }
         console.log(data)
         makeGroup()

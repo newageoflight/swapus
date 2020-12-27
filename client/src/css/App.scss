@@ -23,5 +23,8 @@ html {
 
 html, body, #root, .App {
     height: 100%;
-    overflow: hidden;
+}
+
+.ReactModalPortal {
+    z-index: 2;
 }

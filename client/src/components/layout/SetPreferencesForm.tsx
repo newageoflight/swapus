@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form';
 import CreatableSelect from "react-select/creatable";
-
+import { LoggedIn } from './../../context/LoggedIn';
+import { useRecoilValue } from 'recoil';
 
 interface ModifyPreferencesForm {
+    username: string;
     have: string | null;
     want: string[] | null;
     comment: string | null;
@@ -20,8 +22,10 @@ interface Props {
 export const SetPreferencesForm: React.FC<Props> = ({dataPoster, options, currentHave, currentWant, currentComment}) => {
     const { register, control, handleSubmit } = useForm<ModifyPreferencesForm>();
     const [showChangePreferences, setShowChangePreferences] = useState(false);
+    const loggedIn = useRecoilValue(LoggedIn);
 
     const onSubmit = (data: ModifyPreferencesForm) => {
+        data = {...data, username: loggedIn.username}
         if (!data.have)
             data.have = currentHave;
         if (!data.want)
@@ -34,7 +38,7 @@ export const SetPreferencesForm: React.FC<Props> = ({dataPoster, options, curren
     }
 
     const resetPreferences = () => {
-        dataPoster({have: null, want: null, comment: null} as ModifyPreferencesForm);
+        dataPoster({username: loggedIn.username, have: null, want: null, comment: null})
         setShowChangePreferences(false);
     }
 
