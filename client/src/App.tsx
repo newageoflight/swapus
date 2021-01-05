@@ -35,13 +35,13 @@ function App() {
     useEffect(() => {
         async function getGroups() {
             let userGroups = await callProtectedEndpoint(`/api/v1/graph/usergroups`, loggedIn.token.access_token, history, resetLoggedIn)
+            console.log(userGroups)
             let dataToSet = (userGroups as GroupInterface[] || [] as GroupInterface[])
             setGroupList(dataToSet);
         }
-        console.log(loggedIn)
-        if (!!loggedIn.token.access_token && partialChange) {
+        if (!!loggedIn.token.access_token) {
           getGroups()
-          setPartialChange(false);
+          partialChange && setPartialChange(false);
         }
         // eslint-disable-next-line
     }, [loggedIn, partialChange])

@@ -1,13 +1,17 @@
+from typing import List, Optional
 from datetime import timedelta
 from fastapi import Depends, APIRouter, status
 from fastapi.exceptions import HTTPException
+from fastapi.param_functions import Query
 from fastapi.security import OAuth2PasswordRequestForm
 from motor.motor_asyncio import AsyncIOMotorClient
 
+from .db.db import get_database
+from .db.mongo_utils import demongoify
+from .models.auth import RegistrationForm, User, UserInDB, UserToInsert
+from .models.generic import Success
 from .utils.auth import (ACCESS_TOKEN_EXPIRE_MINUTES, authenticate_user, create_access_token,
     get_current_active_user, get_password_hash, oauth2_scheme)
-from .db.db import get_database
-from .models.auth import RegistrationForm, User, UserInDB, UserToInsert
 
 router = APIRouter(prefix="/api/v1/auth", tags=["authentication"])
 
@@ -73,10 +77,23 @@ async def modify_current_user(modification: User, current_user: User = Depends(g
     to_ret = UserInDB.from_mongo(new_user)
     return to_ret
 
-@router.get("/userunique/{username}")
+@router.get("/userunique/{username}", response_model=Success)
 async def ensure_username_unique(username, db: AsyncIOMotorClient = Depends(get_database)):
     """
     Endpoint called during the registration process to ensure that a username is unique (i.e. doesn't already exist in the database)
     """
     user = await db.swapus.users.find_one({"username": username})
-    return {"success": True, "exists": user is not None}
+    to_ret = None
+    if user:
+        user_model = UserInDB.from_mongo(user)
+        to_ret = demongoify(user_model)
+    return Success(success=user is None, exists=to_ret)
+
+@router.get("/userexist", response_model=Success)
+async def ensure_usernames_exist(usernames: List[str] = Query(...), db: AsyncIOMotorClient = Depends(get_database)):
+    """
+    Endpoint called during group creation to ensure that a set of usernames exists in the database.
+    """
+    users = await db.swapus.users.find({"username": {"$in": usernames}}).to_list(None)
+    to_ret = [UserInDB.from_mongo(user) for user in users]
+    return Success(success=len(users) == len(usernames), exists=[demongoify(u) for u in to_ret])

@@ -1,15 +1,17 @@
 import React from 'react'
 import { useHistory } from 'react-router';
-import { useRecoilState } from "recoil";
+import { useRecoilState, useSetRecoilState } from "recoil";
 
 import { callProtectedEndpoint } from '../../utils/HTTPHandlers';
 import { LoggedIn } from '../../context/LoggedIn';
 import { createEmptyUserData } from '../../interfaces/UserDataInterface';
+import { GroupListPartiallyChanged } from './../../context/GroupListPartiallyChanged';
 
 export const JoinGroup: React.FC = () => {
     const history = useHistory();
     const [loggedIn, setLoggedIn] = useRecoilState(LoggedIn);
     const resetLoggedIn = () => setLoggedIn(createEmptyUserData())
+    const setPartialChange = useSetRecoilState(GroupListPartiallyChanged);
 
     const joinGroup = (evt: any) => {
         evt.preventDefault()
@@ -19,6 +21,7 @@ export const JoinGroup: React.FC = () => {
             await callProtectedEndpoint(`/api/v1/graph/join/${groupcode}`, loggedIn.token.access_token, history, resetLoggedIn, {method: "PUT"})
         }
         addSelfToGroup()
+        setPartialChange(true);
         history.push(`/groups/${groupcode}`)
     }
 

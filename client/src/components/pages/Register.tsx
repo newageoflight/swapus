@@ -19,12 +19,16 @@ export const Register: React.FC = () => {
         fetch("/api/v1/auth/register", {
             method: "POST",
             body: objectToFormData(data),
-        }).then(res => res.json())
+        }).then(res => {
+            console.log(res, res.ok ? "OK" : "Error");
+            return res.json();
+        })
         .then(data => {
+            console.log(data)
             if (!!data)
                 history.push("/login")
         })
-        .catch(err => console.error(err))
+        .catch(err => console.log(err.response.data))
     }
 
     return (
@@ -37,7 +41,7 @@ export const Register: React.FC = () => {
                         validate: ensureUniqueUsername
                     })}/>
                 </div>
-                {errors.username && <FormError>Must specify a username</FormError>}
+                {errors.username && <FormError>{errors.username.message || "Must specify a username!"}</FormError>}
                 <div className="input-label-oneline">
                     <label htmlFor="full_name">Full name</label>
                     <input id="full_name" name="full_name" type="text" placeholder="Enter your full name..." ref={register}/>
@@ -50,13 +54,13 @@ export const Register: React.FC = () => {
                     <label htmlFor="password">Password*</label>
                     <input id="password" name="password" type="password" placeholder="Enter your password..." ref={register({required:true})} />
                 </div>
-                {errors.password && <FormError>Must specify a password</FormError>}
+                {errors.password && <FormError>Must specify a password!</FormError>}
                 <div className="input-label-oneline">
                     <label htmlFor="confirm_password">Confirm password*</label>
                     <input id="confirm_password" name="confirm_password" type="password" placeholder="Confirm your password..."
-                        ref={register({validate: (value) => value === watch("password")})}/>
+                        ref={register({validate: (value) => value === watch("password") || "Passwords do not match!"})}/>
                 </div>
-                {errors.confirm_password && <FormError>Passwords do not match!</FormError>}
+                {errors.confirm_password && <FormError>{errors.confirm_password.message || "Must confirm password!"}</FormError>}
                 <button type="submit">Register</button>
             </form>
         </>
@@ -66,5 +70,5 @@ export const Register: React.FC = () => {
 const ensureUniqueUsername = async (username: string) => {
     let response = await fetch(`/api/v1/auth/userunique/${username}`);
     let result = await response.json();
-    return !result.exists;
+    return result.success || "This username is already taken!"
 }

@@ -5,3 +5,4 @@ class Success(BaseModel):
     success: bool
     count: Optional[int]
     data: Optional[Any]
+    exists: Optional[Any]

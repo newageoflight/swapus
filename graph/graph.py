@@ -23,6 +23,9 @@ class Cycle(object):
         self._edge_counter = None
         self._node_counter = None
 
+    def __len__(self):
+        return len(self.cycle)
+
     def __repr__(self) -> str:
         return f"Cycle({self.cycle})"
 
@@ -109,7 +112,7 @@ class SwapGraph(object):
             
 
 @lru_cache(maxsize=None)
-def edge_covering_cycles(graph: SwapGraph) -> List[Cycle]:
+def edge_covering_cycles(graph: SwapGraph, bias_short=True) -> List[Cycle]:
     """
     Returns the optimal set of edge-covering cycles for a given multidigraph
     """
@@ -124,12 +127,18 @@ def edge_covering_cycles(graph: SwapGraph) -> List[Cycle]:
     else:
         best_cycle_set = []
         min_cardinality = 1e8
+        longest_cycle_len = 1e8
         for cycle in cycles:
             subgraph = SwapGraph(graph_counter - cycle.get_edge_cover())
             cycle_set = edge_covering_cycles(subgraph)
             coverage_counter = reduce(lambda a,b: a+b, [c.get_edge_cover() for c in cycle_set])
             remaining_cardinality = counter_cardinality(subgraph.as_counter() - coverage_counter)
-            if remaining_cardinality < min_cardinality:
+            # if remaining_cardinality < min_cardinality:
+            #     min_cardinality = remaining_cardinality
+            #     best_cycle_set = [cycle] + cycle_set
+            # 2 conditions: the cardinality has to be all covered and the longest cycle should not be too large
+            rule_in_criterion = remaining_cardinality <= min_cardinality and (bias_short and max(map(len, cycle_set)) < longest_cycle_len)
+            if rule_in_criterion:
                 min_cardinality = remaining_cardinality
                 best_cycle_set = [cycle] + cycle_set
         return best_cycle_set

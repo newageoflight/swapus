@@ -1,5 +1,6 @@
 from graph.multiswap import MultiSwap, MultiSwapProtoGraph
 from graph.graph import SwapGraph, Swap, edge_covering_cycles, edges_uncoverable
+from timeit import default_timer as timer
 
 import unittest
 
@@ -25,7 +26,23 @@ class TestSingleWantCoverage(unittest.TestCase):
         self.assertTrue(self.graph.suggest_swaps(self.covering_cycles))
 
     def test_fully_coverable(self):
-        self.assertEquals(edges_uncoverable(self.graph), 0)
+        self.assertEqual(edges_uncoverable(self.graph), 0)
+    
+    def test_equivocal_solutions(self):
+        """
+        Fails if the algorithm for detecting edge covering cycles favours longer cycles
+        Uses a simple triangle multidigraph where every edge is doubly connected with each other
+        """
+        self.graph = SwapGraph([Swap(*x) for x in [
+            (1,2),
+            (2,1),
+            (2,3),
+            (3,2),
+            (3,1),
+            (1,3),
+        ]])
+        self.covering_cycles = edge_covering_cycles(self.graph)
+        self.assertEqual(len(self.covering_cycles), 3)
 
 class TestMultipleWantCoverage(unittest.TestCase):
     def setUp(self):
@@ -46,4 +63,8 @@ class TestMultipleWantCoverage(unittest.TestCase):
         ]])
 
     def test_anneal_configurations(self):
-        self.assertTrue(self.proto_graph.anneal_configurations())
+        start = timer()
+        to_test = self.proto_graph.determine_optimal_configuration()
+        end = timer()
+        print(f"Annealing time: {end-start}")
+        self.assertTrue(to_test)

@@ -1,4 +1,9 @@
-header nav {
+.App > header {
+  -webkit-box-shadow: 0 1px 1px 1px #ddd;
+          box-shadow: 0 1px 1px 1px #ddd;
+}
+
+.App > header nav {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -11,7 +16,7 @@ header nav {
   font-size: 12pt;
 }
 
-header nav .left-block {
+.App > header nav .left-block {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -28,7 +33,7 @@ header nav .left-block {
   height: 100%;
 }
 
-header nav .left-block .logo {
+.App > header nav .left-block .logo {
   -webkit-box-ordinal-group: 2;
       -ms-flex-order: 1;
           order: 1;
@@ -37,18 +42,18 @@ header nav .left-block .logo {
   margin-right: 10px;
 }
 
-header nav .left-block .logo img {
+.App > header nav .left-block .logo img {
   max-width: 100%;
   max-height: 100%;
 }
 
-header nav .left-block .menu {
+.App > header nav .left-block .menu {
   -webkit-box-ordinal-group: 3;
       -ms-flex-order: 2;
           order: 2;
 }
 
-header nav ul:not(.user-panel) {
+.App > header nav ul:not(.user-panel) {
   list-style-type: none;
   margin: 0;
   padding: 0;
@@ -62,7 +67,7 @@ header nav ul:not(.user-panel) {
           align-items: stretch;
 }
 
-header nav ul:not(.user-panel) li.item {
+.App > header nav ul:not(.user-panel) li.item {
   display: -webkit-inline-box;
   display: -ms-inline-flexbox;
   display: inline-flex;
@@ -71,7 +76,7 @@ header nav ul:not(.user-panel) li.item {
           align-items: stretch;
 }
 
-header nav ul:not(.user-panel) li.item > a, header nav ul:not(.user-panel) li.item > button.user-button {
+.App > header nav ul:not(.user-panel) li.item > a, .App > header nav ul:not(.user-panel) li.item > button.user-button {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -88,22 +93,22 @@ header nav ul:not(.user-panel) li.item > a, header nav ul:not(.user-panel) li.it
   border-bottom: 3px solid transparent;
 }
 
-header nav ul:not(.user-panel) li.item > a:hover, header nav ul:not(.user-panel) li.item > button.user-button:hover {
+.App > header nav ul:not(.user-panel) li.item > a:hover, .App > header nav ul:not(.user-panel) li.item > button.user-button:hover {
   background-color: #ddd;
   border-bottom-color: #5CB9FF;
 }
 
-header nav ul:not(.user-panel) li.item > a:active, header nav ul:not(.user-panel) li.item > button.user-button:active {
+.App > header nav ul:not(.user-panel) li.item > a:active, .App > header nav ul:not(.user-panel) li.item > button.user-button:active {
   background-color: #999;
   border-bottom-color: #F5AD42;
 }
 
-header nav ul:not(.user-panel) li.item > a.active, header nav ul:not(.user-panel) li.item > button.user-button.active {
+.App > header nav ul:not(.user-panel) li.item > a.active, .App > header nav ul:not(.user-panel) li.item > button.user-button.active {
   background-color: #eee;
   border-bottom-color: #F5AD42;
 }
 
-header nav ul:not(.user-panel) li.item button.user-button {
+.App > header nav ul:not(.user-panel) li.item button.user-button {
   background-color: transparent;
   border-radius: 0px;
   border-bottom: 3px solid transparent;
@@ -112,7 +117,7 @@ header nav ul:not(.user-panel) li.item button.user-button {
   font-size: 1em;
 }
 
-header nav .user-panel {
+.App > header nav .user-panel {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -135,7 +140,7 @@ header nav .user-panel {
   z-index: 999;
 }
 
-header nav .user-panel li {
+.App > header nav .user-panel li {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -154,7 +159,7 @@ header nav .user-panel li {
       flex-basis: 100%;
 }
 
-header nav .user-panel li > a, header nav .user-panel li > button {
+.App > header nav .user-panel li > a, .App > header nav .user-panel li > button {
   width: inherit;
   -webkit-box-flex: 1;
       -ms-flex: 1;
@@ -172,24 +177,24 @@ header nav .user-panel li > a, header nav .user-panel li > button {
   color: black;
 }
 
-header nav .user-panel li > a:hover, header nav .user-panel li > button:hover {
+.App > header nav .user-panel li > a:hover, .App > header nav .user-panel li > button:hover {
   background-color: #ddd;
 }
 
-header nav .user-panel li > a:active, header nav .user-panel li > button:active {
+.App > header nav .user-panel li > a:active, .App > header nav .user-panel li > button:active {
   background-color: #999;
 }
 
-header nav .user-panel li > a.active, header nav .user-panel li > button.active {
+.App > header nav .user-panel li > a.active, .App > header nav .user-panel li > button.active {
   background-color: #eee;
 }
 
-header nav .user-panel li > a:focus, header nav .user-panel li > button:focus {
+.App > header nav .user-panel li > a:focus, .App > header nav .user-panel li > button:focus {
   border: none;
   outline: none;
 }
 
-header nav .user-menu {
+.App > header nav .user-menu {
   -webkit-box-ordinal-group: 3;
       -ms-flex-order: 2;
           order: 2;

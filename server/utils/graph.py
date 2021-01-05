@@ -41,7 +41,6 @@ async def recalculate_swap_paths(group_id: str, db: AsyncIOMotorClient) -> None:
     new_swap_graph = swap_graph_from_group_data(group_in_db)
     best_configuration = new_swap_graph.determine_optimal_configuration()
     proto_best_swap_sequence = best_configuration.suggest_swaps(edge_covering_cycles(best_configuration))
-    # will return a list of list of proto-SwapGroupMembers
     best_swap_sequence_demongoed = translate_cycles_into_demongoed_member_lists(proto_best_swap_sequence, group_in_db)
     update_best_sequence = await db.swapus.groups.update_one({"_id": ObjectId(group_id)}, {"$set":
         {"swap_cycles": best_swap_sequence_demongoed}

@@ -4,18 +4,20 @@ import { LoggedIn } from '../../context/LoggedIn';
 import { GroupList } from './../../context/GroupList';
 import { GroupInterface, GroupMember, GroupMemberSingleWant } from './../../interfaces/GroupInterface';
 import { SwapGroupItem } from '../layout/SwapGroupItem';
+import { GroupListPartiallyChanged } from './../../context/GroupListPartiallyChanged';
 
 export const Dashboard: React.FC = () => {
     const loggedIn = useRecoilValue(LoggedIn);
     // if data is still being fetched from the server it should show a loading screen and not misleading content
     const groupList = useRecoilValue(GroupList);
     const [currentActiveSwaps, setCurrentActiveSwaps] = useState<GroupInterface[]>([] as GroupInterface[]);
+    const partialChange = useRecoilValue(GroupListPartiallyChanged);
 
     useEffect(() => {
         console.log("Group list updated")
         setCurrentActiveSwaps(getCurrentActiveSwaps(groupList));
         // eslint-disable-next-line
-    }, [groupList])
+    }, [groupList, partialChange])
     
     const getCurrentActiveSwaps = (grpList: GroupInterface[]) => {
         for (const grp of grpList) {

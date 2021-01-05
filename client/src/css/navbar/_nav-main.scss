@@ -1,6 +1,7 @@
 // mobile first design is encouraged so phones don't suffer as much
 // for desktops use min-width: 960px
-header {
+.App > header {
+    box-shadow: 0 1px 1px 1px #ddd;
 
     nav {
         display: flex;

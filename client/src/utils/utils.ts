@@ -13,3 +13,11 @@ export function getObjProp<T, K extends keyof T>(obj: T, key: K) {
 export function hasKey<T>(obj: T, key: keyof any): key is keyof T {
     return key in obj;
 }
+
+export function setIntersection<T>(arr1: T[], arr2: T[]) {
+    return arr1.filter(x => arr2.includes(x));
+}
+
+export function setDifference<T>(arr1: T[], arr2: T[]) {
+    return arr1.filter(x => !arr2.includes(x));
+}

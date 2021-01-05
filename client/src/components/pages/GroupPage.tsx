@@ -68,10 +68,13 @@ export const GroupPage: React.FC = () => {
     const deleteGroup = (evt: any, msg: string) => {
         evt.preventDefault();
         const delThis = async () => {
+            console.log(groupList);
             let result = await callProtectedEndpoint(`/api/v1/graph/group/${id}`, loggedIn.token.access_token, history, resetLoggedIn, {method: "DELETE"});
             if (result.success) {
-                let newList = groupList;
-                newList.splice(newList.findIndex(({id: grpId}) => grpId === id), 1)
+                let newList = [...groupList];
+                console.log(newList)
+                let delIndex = newList.findIndex(({id: grpId}) => grpId === id)
+                newList.splice(delIndex, 1)
                 setGroupList(newList);
                 resetGroupState()
                 history.push("/")

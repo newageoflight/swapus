@@ -10,6 +10,7 @@ import { GroupList } from './../../context/GroupList';
 export const Groups: React.FC = () => {
     const loggedIn = useRecoilValue(LoggedIn)
     const groupList = useRecoilValue(GroupList);
+    console.log(groupList)
 
     return (
         <>

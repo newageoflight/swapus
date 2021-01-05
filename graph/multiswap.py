@@ -24,6 +24,7 @@ class MultiSwapProtoGraph(object):
     def determine_optimal_configuration(self):
         polyswaps = [i for i, s in enumerate(self.swaps) if len(s.want) > 1]
         if polyswaps:
+            print(self.count_legal_configurations())
             return self.anneal_configurations() 
         else:
             # implies that all arrays are length 1 or less
@@ -35,6 +36,7 @@ class MultiSwapProtoGraph(object):
         # How will this work?
         # Start with a random configuration.
         usable_swaps = self.swaps.copy()
+        polyswaps = [i for i,s in enumerate(usable_swaps) if len(s.want) > 1]
         current_state = [Swap(s.have, random.choice(s.want), s.data) for s in usable_swaps]
         current_graph = SwapGraph(current_state)
         uncoverable_current = edges_uncoverable(current_graph)
@@ -43,7 +45,7 @@ class MultiSwapProtoGraph(object):
         min_uncoverable = edges_uncoverable(current_graph)
         # Decide whether or not to accept the new config based on total coverability and temperature
         while T >= 1e-8 and iters < iterlimit:
-            index_to_change = random.choice([i for i, s in enumerate(usable_swaps) if len(s.want) > 1])
+            index_to_change = random.choice(polyswaps)
             replacement_item = usable_swaps[index_to_change]
             next_state = current_state.copy()
             next_state[index_to_change] = Swap(replacement_item.have, random.choice(replacement_item.want), replacement_item.data)

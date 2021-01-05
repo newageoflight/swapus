@@ -1,17 +1,22 @@
-from server.models.generic import Success
 from typing import List
-from graph.graph import edge_covering_cycles
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
+from fastapi.exceptions import HTTPException
+from fastapi.logger import logger
+from sse_starlette.sse import EventSourceResponse
 
 from bson.objectid import ObjectId
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from .db.db import get_database
 from .models.auth import User
+from .models.generic import Success
 from .models.graph import MemberUpdateForm, SwapGroup, SwapGroupCreationForm, SwapGroupInDB, SwapGroupMember
 from .utils.auth import get_current_active_user, oauth2_scheme
-from .utils.graph import recalculate_swap_paths, swap_graph_from_group_data, translate_cycles_into_demongoed_member_lists
+from .utils.graph import recalculate_swap_paths
 
+import asyncio
+
+CHANGE_QUEUE = []
 router = APIRouter(prefix="/api/v1/graph", tags=["graph"])
 
 @router.post("/create", response_model=Success)
@@ -27,13 +32,20 @@ async def create_group(
     # since this is inherently a group for swapping things
     # each member item should be an interface consisting of username, have, want
     if creation_form.members:
+        # check that all the users actually exist
+        find_all = await db.swapus.users.find({"username": {"$in": creation_form.members}}).to_list(None)
+        # if one or more of the users doesn't exist, return an error indicating who is missing
+        if len(find_all) == len(creation_form.members):
+            existing_usernames = [m for m in find_all if m["username"] in find_all]
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={"missing": [m for m in creation_form.members if m not in existing_usernames]})
+        # then make the list
         group_member_list = [*creation_form.members, current_user.username]
     else:
         group_member_list = [current_user.username]
     group_members = [SwapGroupMember(username=u) for u in group_member_list]
     new_group = SwapGroup(**creation_form.dict(exclude={"members"}), members=[g.dict() for g in group_members], owner=current_user.username)
     new_group_id = await db.swapus.groups.insert_one(new_group.dict())
-    return Success(success=True, data=new_group_id.inserted_id)
+    return Success(success=True, data=str(new_group_id.inserted_id))
 
 # this seems stupidly insecure but I'm planning to fix it down the line
 @router.put("/join/{group_id}", response_model=Success)
@@ -45,6 +57,8 @@ async def join_group(group_id: str, db: AsyncIOMotorClient = Depends(get_databas
     group = await db.swapus.groups.update_one({"_id": ObjectId(group_id)}, {"$addToSet": {"members": add_user.dict()}})
     return Success(success=group.acknowledged, data=group_id)
 
+# the recalculation needs to be fixed because it's seriously slow, which users likely won't tolerate. just use SSE, no need for sockets
+# https://sairamkrish.medium.com/handling-server-send-events-with-python-fastapi-e578f3929af1
 @router.patch("/group/{group_id}", response_model=SwapGroupInDB)
 async def modify_swap_preferences(group_id: str, modification: MemberUpdateForm, current_user: User = Depends(get_current_active_user), db: AsyncIOMotorClient = Depends(get_database)) -> SwapGroupInDB:
     """
@@ -59,6 +73,7 @@ async def modify_swap_preferences(group_id: str, modification: MemberUpdateForm,
     to_ret = SwapGroupInDB.from_mongo(new_group)
     return to_ret
 
+# should this also use SSE? give the homepage the ability to update in real-time?
 @router.get("/usergroups", response_model=List[SwapGroupInDB])
 async def get_my_groups(current_user: User = Depends(get_current_active_user), db: AsyncIOMotorClient = Depends(get_database)) -> List[SwapGroupInDB]:
     """
@@ -105,3 +120,20 @@ async def remove_group_by_id(group_id: str, current_user: User = Depends(get_cur
         result = await db.swapus.groups.update_one({"_id": ObjectId(group_id)}, {"$pull": {"members": {"username": current_user.username}}})
         await recalculate_swap_paths(group_id, db)
         return Success(success=result.acknowledged, count=1)
+
+@router.get("/group/{group_id}/stream")
+async def subscribe_to_group_updates(group_id: str, current_user: User = Depends(get_current_active_user), db: AsyncIOMotorClient = Depends(get_database)):
+    """
+    SSE endpoint called when some part of the group is updated.
+    """
+    status_stream_delay = 5 # seconds
+    status_stream_retry_timeout = 30000 # ms
+    async def status_event_generator(req):
+        previous_status = None
+        while True:
+            # TODO: calculate a new swap cycle for the popped item if CHANGE_QUEUE is not empty, then broadcast the update to the users involved
+            if CHANGE_QUEUE:
+                top_item = CHANGE_QUEUE.pop(0)
+                pass
+            await asyncio.sleep(status_stream_delay)
+    return EventSourceResponse(status_event_generator)
