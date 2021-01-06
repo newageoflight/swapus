@@ -14,7 +14,7 @@ export const Dashboard: React.FC = () => {
     const partialChange = useRecoilValue(GroupListPartiallyChanged);
 
     useEffect(() => {
-        console.log("Group list updated")
+        // console.log("Group list updated")
         setCurrentActiveSwaps(getCurrentActiveSwaps(groupList));
         // eslint-disable-next-line
     }, [groupList, partialChange])
@@ -35,9 +35,9 @@ export const Dashboard: React.FC = () => {
         members.find(m => m.username === loggedIn.username)!.want
 
     const existsCycleInvolvingUser = ({swap_cycles: cycles}: {swap_cycles: Array<Array<GroupMemberSingleWant>>}) =>
-        !!cycles.find(cycle => cycle.find(({username, have, want}) => username === loggedIn.username))
+        !!cycles.find(cycle => cycle.find(({username}) => username === loggedIn.username))
 
-    console.log(currentActiveSwaps);
+    // console.log(currentActiveSwaps);
     return (
         <>
             <h1>My Active Swaps</h1>

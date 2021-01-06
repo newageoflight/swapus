@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Request, status
 from fastapi.exceptions import HTTPException
 from fastapi.logger import logger
 from sse_starlette.sse import EventSourceResponse
@@ -17,6 +17,8 @@ from .utils.graph import recalculate_swap_paths
 import asyncio
 
 CHANGE_QUEUE = []
+STREAM_DELAY = 1 # second
+STREAM_RETRY_TIMEOUT = 15000 # milliseconds
 router = APIRouter(prefix="/api/v1/graph", tags=["graph"])
 
 @router.post("/create", response_model=Success)
@@ -57,8 +59,6 @@ async def join_group(group_id: str, db: AsyncIOMotorClient = Depends(get_databas
     group = await db.swapus.groups.update_one({"_id": ObjectId(group_id)}, {"$addToSet": {"members": add_user.dict()}})
     return Success(success=group.acknowledged, data=group_id)
 
-# the recalculation needs to be fixed because it's seriously slow, which users likely won't tolerate. just use SSE, no need for sockets
-# https://sairamkrish.medium.com/handling-server-send-events-with-python-fastapi-e578f3929af1
 @router.patch("/group/{group_id}", response_model=SwapGroupInDB)
 async def modify_swap_preferences(group_id: str, modification: MemberUpdateForm, current_user: User = Depends(get_current_active_user), db: AsyncIOMotorClient = Depends(get_database)) -> SwapGroupInDB:
     """
@@ -68,7 +68,7 @@ async def modify_swap_preferences(group_id: str, modification: MemberUpdateForm,
     update = await db.swapus.groups.update_one({"_id": ObjectId(group_id), "members.username": current_user.username}, {"$set": {
         "members.$": modification.dict()
     }})
-    await recalculate_swap_paths(group_id, db)
+    CHANGE_QUEUE.append(group_id)
     new_group = await db.swapus.groups.find_one({"_id": ObjectId(group_id)})
     to_ret = SwapGroupInDB.from_mongo(new_group)
     return to_ret
@@ -118,22 +118,43 @@ async def remove_group_by_id(group_id: str, current_user: User = Depends(get_cur
     else:
         # Remove current user
         result = await db.swapus.groups.update_one({"_id": ObjectId(group_id)}, {"$pull": {"members": {"username": current_user.username}}})
-        await recalculate_swap_paths(group_id, db)
+        CHANGE_QUEUE.append(group_id)
         return Success(success=result.acknowledged, count=1)
 
-@router.get("/group/{group_id}/stream")
-async def subscribe_to_group_updates(group_id: str, current_user: User = Depends(get_current_active_user), db: AsyncIOMotorClient = Depends(get_database)):
+# the recalculation needs to be fixed because it's seriously slow, which users likely won't tolerate. just use SSE, no need for sockets
+# https://sairamkrish.medium.com/handling-server-send-events-with-python-fastapi-e578f3929af1
+# so the EventStream API for JavaScript doesn't natively support including Auth headers which is... problematic
+# THIS IS DANGEROUSLY UNSAFE FOR NOW, DO NOT PUSH OUT
+# the server is successfully emitting events but somehow the client isn't receiving them???
+@router.get("/stream")
+async def subscribe_to_group_updates(req: Request, db: AsyncIOMotorClient = Depends(get_database)):
     """
     SSE endpoint called when some part of the group is updated.
     """
-    status_stream_delay = 5 # seconds
-    status_stream_retry_timeout = 30000 # ms
-    async def status_event_generator(req):
-        previous_status = None
+    async def status_event_generator():
+        counter = 1
         while True:
             # TODO: calculate a new swap cycle for the popped item if CHANGE_QUEUE is not empty, then broadcast the update to the users involved
+            if await req.is_disconnected():
+                logger.debug("[SSE] Request disconnected")
+                break
+
             if CHANGE_QUEUE:
+                print("Change queue is nonempty:",CHANGE_QUEUE)
                 top_item = CHANGE_QUEUE.pop(0)
-                pass
-            await asyncio.sleep(status_stream_delay)
-    return EventSourceResponse(status_event_generator)
+                send_data = {"id": top_item}
+                await recalculate_swap_paths(top_item, db)
+                print("Swaps recalculated, emitting event")
+                yield {
+                    "event": "update",
+                    "id": counter,
+                    "retry": STREAM_RETRY_TIMEOUT,
+                    "data": send_data,
+                }
+                logger.debug("[SSE] Current status: "+str(send_data))
+            else:
+                logger.debug("[SSE] No change in status")
+
+            counter += 1
+            await asyncio.sleep(STREAM_DELAY)
+    return EventSourceResponse(status_event_generator())

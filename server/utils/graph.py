@@ -20,7 +20,7 @@ def translate_cycles_into_member_lists(cycles, group: SwapGroupInDB) -> List[Lis
     for cycle in cycles:
         new_cycle = []
         for edge in cycle:
-            print(edge)
+            # print(edge)
             old_have, old_want, _, edge_data = edge
             have = group.options[old_have]
             want = group.options[old_want]

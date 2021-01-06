@@ -13,6 +13,8 @@ from .models.generic import Success
 from .utils.auth import (ACCESS_TOKEN_EXPIRE_MINUTES, authenticate_user, create_access_token,
     get_current_active_user, get_password_hash, oauth2_scheme)
 
+# Consider adding cookie auth
+# https://medium.com/data-rebels/fastapi-how-to-add-basic-and-cookie-authentication-a45c85ef47d3
 router = APIRouter(prefix="/api/v1/auth", tags=["authentication"])
 
 @router.post("/token")

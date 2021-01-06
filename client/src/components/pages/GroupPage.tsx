@@ -16,6 +16,7 @@ import { SetPreferencesForm } from '../layout/SetPreferencesForm';
 import { LoadingElement } from '../layout/LoadingElement';
 import { GroupListPartiallyChanged } from './../../context/GroupListPartiallyChanged';
 
+// TODO: make the page update on SSE
 export const GroupPage: React.FC = () => {
     // gonna use this for the selection elements
     // https://react-select.com/home

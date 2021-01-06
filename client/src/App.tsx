@@ -32,19 +32,42 @@ function App() {
   const [partialChange, setPartialChange] = useRecoilState(GroupListPartiallyChanged);
   const setGroupList = useSetRecoilState(GroupList);
 
-    useEffect(() => {
-        async function getGroups() {
-            let userGroups = await callProtectedEndpoint(`/api/v1/graph/usergroups`, loggedIn.token.access_token, history, resetLoggedIn)
-            console.log(userGroups)
-            let dataToSet = (userGroups as GroupInterface[] || [] as GroupInterface[])
-            setGroupList(dataToSet);
-        }
-        if (!!loggedIn.token.access_token) {
-          getGroups()
-          partialChange && setPartialChange(false);
-        }
-        // eslint-disable-next-line
-    }, [loggedIn, partialChange])
+  useEffect(() => {
+      async function getGroups() {
+          let userGroups = await callProtectedEndpoint(`/api/v1/graph/usergroups`, loggedIn.token.access_token, history, resetLoggedIn)
+          let dataToSet = (userGroups as GroupInterface[] || [] as GroupInterface[])
+          setGroupList(dataToSet);
+      }
+      if (!!loggedIn.token.access_token) {
+        getGroups()
+        partialChange && setPartialChange(false);
+      }
+      // eslint-disable-next-line
+  }, [loggedIn, partialChange])
+
+  useEffect(() => {
+    if (!!loggedIn && Object.keys(loggedIn).length > 0) {
+      const evtSource = new EventSource(`/api/v1/graph/stream`);
+      evtSource.onopen = evt => {
+        console.log("SSE socket opened!");
+        console.log(evtSource.readyState);
+      }
+      evtSource.onmessage = evt => {
+        console.log("Received message from stream");
+        console.log(evt);
+      }
+      evtSource.onerror = evt => {
+        console.log("SSE error!")
+      }
+
+      evtSource.addEventListener("update", (evt) => {
+        console.log("Update event received");
+        console.log(evt);
+        setPartialChange(true);
+      })
+    }
+    // eslint-disable-next-line
+  }, [loggedIn])
 
   const defaultProtectedRouteProps: ProtectedRouteProps = {
     isAuthenticated: !!loggedIn.token.access_token,
