@@ -7,6 +7,7 @@ from starlette.requests import Request
 from .auth import router as AuthRouter
 from .graph import router as GraphRouter
 from .db.db import db
+from .settings import MONGO_URI
 
 import asyncio
 import os
@@ -36,7 +37,7 @@ app.include_router(GraphRouter)
 
 @app.on_event("startup")
 async def connect_mongo():
-    db.client = AsyncIOMotorClient("***REMOVED***")
+    db.client = AsyncIOMotorClient(MONGO_URI)
 
 @app.on_event("shutdown")
 async def disconnect_mongo():

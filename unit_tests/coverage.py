@@ -64,7 +64,15 @@ class TestMultipleWantCoverage(unittest.TestCase):
 
     def test_anneal_configurations(self):
         start = timer()
+        to_test = self.proto_graph.determine_optimal_configuration(iterlimit=100000)
+        end = timer()
+        print(f"Annealing time (100k iterations): {end-start}")
+        self.assertTrue(to_test)
+        start = timer()
         to_test = self.proto_graph.determine_optimal_configuration()
         end = timer()
-        print(f"Annealing time: {end-start}")
-        self.assertTrue(to_test)
+        print(f"Annealing time (1m iterations): {end-start}")
+        start = timer()
+        to_test = self.proto_graph.determine_optimal_configuration(iterlimit=10000000)
+        end = timer()
+        print(f"Annealing time (10m iterations): {end-start}")
